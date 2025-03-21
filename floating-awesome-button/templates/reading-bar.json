@@ -1,0 +1,26 @@
+{
+  "id": "reading-bar",
+  "name": "Reading Progress Bar",
+  "description": "Add a floating reading progress bar to your website, showing visitors how far they've scrolled through your content. Perfect for long-form articles, blog posts, and improved user engagement!",
+  "license": "free",
+  "settings": {
+    "type": "readingbar"
+  },
+  "design": {
+    "color": "#4CAF50",
+    "grouped": true,
+    "icon": {
+      "color": "#fff",
+      "class": "fa-solid fa-book-reader"
+    },
+    "responsive": {
+      "device": {
+        "mobile": 1,
+        "tablet": 1,
+        "desktop": 1
+      }
+    },
+    "shape": "none",
+    "standalone": true
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "newsletter-signup-toast",
+  "name": "Newsletter Signup Toast",
+  "description": "Add a newsletter signup toast notification to engage your website visitors. Perfect for growing your email list with a non-intrusive popup!",
+  "license": "free",
+  "settings": {
+    "type": "toast",
+    "message": "Subscribe to our newsletter to stay updated with our latest news and offers!",
+    "duration": 3000,
+    "text_button": "Subscribe",
+    "url_button": "#",
+    "open_in_new_tab": true
+  },
+  "design": {
+    "color": "#4CAF50",
+    "icon": {
+        "color": "#fff",
+        "class": "fa-solid fa-envelope"
+    },
+    "closeable": true,
+    "gravity": "top",
+    "position": "left",
+    "background": "#fff", 
+    "text_color": "#020202",
+    "bar_color": "#4CAF50",
+    "responsive": {
+      "device": {
+        "mobile": 1,
+        "tablet": 1,
+        "desktop": 1
+      }
+    }
+  },
+  "cookie": {
+    "expiration": "1"
+  }
+}

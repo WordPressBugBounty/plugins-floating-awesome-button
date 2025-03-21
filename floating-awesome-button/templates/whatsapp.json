@@ -1,0 +1,28 @@
+{
+  "id": "whatsapp",
+  "name": "WhatsApp Button",
+  "description": "Add a professional WhatsApp button that floats on your website, making it effortless for visitors to instantly connect with you. Perfect for customer support and sales!",
+  "license": "free",
+  "settings": {
+    "type": "link",
+    "link": "https://wa.me/1234567890",
+    "open_in_new_tab": true
+  },
+  "design": {
+    "color": "#25D366",
+    "grouped": true,
+    "icon": {
+      "color": "#fff", 
+      "class": "fa-brands fa-whatsapp"
+    },
+    "responsive": {
+      "device": {
+        "mobile": 1,
+        "tablet": 1,
+        "desktop": 1
+      }
+    },
+    "shape": "none",
+    "standalone": true
+  }
+}
