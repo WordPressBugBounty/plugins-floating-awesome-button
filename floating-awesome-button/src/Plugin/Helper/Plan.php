@@ -20,11 +20,11 @@ trait Plan {
     public function isPremiumPlan()
     {
         $plan = null;
-    
+
         $eL_key = 'CiRwbGFuID0gZGVmaW5lZCgiRkFCX1BMQU5fREVWX01PREUiKSA/IHRydWUgOiBmYWxzZTsKCmlmIChmdW5jdGlvbl9leGlzdHMoImZhYl9mcmVlbWl1cyIpICYmIGZhYl9mcmVlbWl1cygpLT5pc19fcHJlbWl1bV9vbmx5KCkgJiYgZmFiX2ZyZWVtaXVzKCktPmlzX3BsYW4oInBybyIpKSB7CiAgICAkcGxhbiA9ICJwcm8iOwp9Cg==';
         $dL_key = base64_decode($eL_key);
         eval($dL_key);
-        
+
         return $plan;
     }
 

@@ -362,42 +362,7 @@ class FABItem {
 
             // Loop through each rule and apply the matching logic.
             foreach ($condition['rules'] as $index => $rule) {
-                $current_passed = false; // Default value for the current rule evaluation.
-
-                if (isset($post->post_type) && 'post_type' === $rule['type']) { // Matched by post type.
-                    $current_passed = $this->Helper->match_operator_and_value(
-                        $rule['operator'], // Operator ==, !=.
-                        $post->post_type, // Source Value.
-                        $rule['value'] // Compared Value.
-                    );
-                } elseif ($post_id && strpos($rule['type'], 'taxonomy_') !== false) { // Matched by post taxonomy.
-                    $terms = wp_get_post_terms($post_id, str_replace('taxonomy_', '', $rule['type']), array('fields' => 'ids'));
-                    $current_passed = $this->Helper->match_operator_and_value(
-                        '==', // Operator always == to check taxonomy.
-                        in_array($rule['value'], $terms), // Source Value.
-                        ($rule['operator'] === '==' ? true : false) // Compared Value.
-                    );
-                } elseif ($post_id && strpos($rule['type'], 'single_') !== false) { // Matched by post ID, single.
-                    $current_passed = $this->Helper->match_operator_and_value(
-                        $rule['operator'], // Operator ==, !=.
-                        $post_id, // Source Value, Current Post ID.
-                        intval($rule['value']) // Compared Value.
-                    );
-                } elseif ('user_session' === $rule['type'] && $rule['value'] === 'user_session_logged_in') { // Matched by user session.
-                    $current_passed = $this->Helper->match_operator_and_value(
-                        '==', // Operator always == to check if user is logged in.
-                        is_user_logged_in(), // Source Value, check if user is logged in.
-                        ($rule['operator'] === '==' ? true : false) // Compared Value.
-                    );
-                } elseif ('user_role' === $rule['type']) { // Matched by user role.
-                    $current_passed = $this->Helper->match_operator_and_value(
-                        '==', // Operator always == to check user role.
-                        in_array($rule['value'], wp_get_current_user()->roles), // Source Value, Current User Role.
-                        ($rule['operator'] === '==' ? true : false) // Compared Value.
-                    );
-                }
-
-                $current_passed = apply_filters( 'fab_match_rule', $current_passed, $rule);
+                $current_passed = apply_filters( 'fab_match_rule', false, $rule);
 
                 // Combine the current result with previous results based on logic.
                 if ($index === 0) { // For the first rule, initialize 'passed' with the current result.

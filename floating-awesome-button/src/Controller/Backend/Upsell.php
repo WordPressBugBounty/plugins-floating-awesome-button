@@ -51,7 +51,7 @@ class Upsell extends Base implements Model_Interface {
             )
         );
 
-        $this->WP->wp_enqueue_script( 'upsell-component', 'build/components/upsell/bundle.js', array(), '', true );
+        $this->WP->wp_enqueue_script( 'upsell-component', 'build/components/upsell/bundle.js', array(), FAB_VERSION, true );
     }
 
     /*

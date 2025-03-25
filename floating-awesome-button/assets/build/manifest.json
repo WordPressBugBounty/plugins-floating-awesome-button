@@ -1,0 +1,66 @@
+{
+  "_runtime-dom.esm-bundler-C5WK88vT.js": {
+    "file": "assets/runtime-dom.esm-bundler-C5WK88vT.js",
+    "name": "runtime-dom.esm-bundler"
+  },
+  "assets/components/metabox-setting/main.js": {
+    "file": "components/metabox-setting/bundle.CDi4OjSd.js",
+    "name": "components/metabox-setting/bundle.js",
+    "src": "assets/components/metabox-setting/main.js",
+    "isEntry": true,
+    "imports": [
+      "_runtime-dom.esm-bundler-C5WK88vT.js"
+    ]
+  },
+  "assets/components/templates/main.js": {
+    "file": "components/templates/bundle.Cwjg8c-0.js",
+    "name": "components/templates/bundle.js",
+    "src": "assets/components/templates/main.js",
+    "isEntry": true,
+    "imports": [
+      "_runtime-dom.esm-bundler-C5WK88vT.js"
+    ]
+  },
+  "assets/ts/backend/plugin.ts": {
+    "file": "js/backend/plugin.BPMB2mGM.js",
+    "name": "js/backend/plugin.js",
+    "src": "assets/ts/backend/plugin.ts",
+    "isEntry": true
+  },
+  "assets/ts/frontend/plugin.ts": {
+    "file": "js/frontend/plugin.CmlnRwMA.js",
+    "name": "js/frontend/plugin.js",
+    "src": "assets/ts/frontend/plugin.ts",
+    "isEntry": true
+  },
+  "assets/ts/integration/contact-form-7.ts": {
+    "file": "js/integration/contact-form-7.min.BOhnLO00.js",
+    "name": "js/integration/contact-form-7.min.js",
+    "src": "assets/ts/integration/contact-form-7.ts",
+    "isEntry": true
+  },
+  "assets/ts/metabox-design/metabox-design.ts": {
+    "file": "js/backend/metabox-design.B5uLVGO-.js",
+    "name": "js/backend/metabox-design.js",
+    "src": "assets/ts/metabox-design/metabox-design.ts",
+    "isEntry": true
+  },
+  "assets/ts/metabox-location/metabox-location.ts": {
+    "file": "js/backend/metabox-location.q3qIh8uF.js",
+    "name": "js/backend/metabox-location.js",
+    "src": "assets/ts/metabox-location/metabox-location.ts",
+    "isEntry": true
+  },
+  "assets/ts/metabox-setting/metabox-setting.ts": {
+    "file": "js/backend/metabox-setting.BmFDalTG.js",
+    "name": "js/backend/metabox-setting.js",
+    "src": "assets/ts/metabox-setting/metabox-setting.ts",
+    "isEntry": true
+  },
+  "assets/ts/metabox-trigger/metabox-trigger.ts": {
+    "file": "js/backend/metabox-trigger.Djqwr4f4.js",
+    "name": "js/backend/metabox-trigger.js",
+    "src": "assets/ts/metabox-trigger/metabox-trigger.ts",
+    "isEntry": true
+  }
+}

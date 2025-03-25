@@ -22,6 +22,12 @@ class Config {
     protected $config;
 
     /**
+     * @access   protected
+     * @var      object    $Helper  Helper instance
+     */
+    protected $Helper;
+
+    /**
      * Constructor
      */
     public function __construct() {

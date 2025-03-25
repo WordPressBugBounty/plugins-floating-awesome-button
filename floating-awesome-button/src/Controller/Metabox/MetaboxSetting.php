@@ -167,8 +167,8 @@ class MetaboxSetting extends Base implements Model_Interface {
         )));
 
         // Enqueue Script & component
-        $this->WP->wp_enqueue_script( 'fab-setting', 'build/js/backend/metabox-setting.min.js', array(), '', true );
-        $this->WP->wp_enqueue_script_component( 'metabox-setting-component', 'build/components/metabox-setting/bundle.js', array(), '1.0', true);
+        $this->WP->wp_enqueue_script_typescript( 'fab-setting', 'assets/ts/metabox-setting/metabox-setting.ts', array(), FAB_VERSION, true );
+        $this->WP->wp_enqueue_script_component( 'metabox-setting-component', 'assets/components/metabox-setting/main.js', array(), FAB_VERSION, true);
     }
 
     /**
@@ -324,7 +324,7 @@ class MetaboxSetting extends Base implements Model_Interface {
         );
 
         // Enqueue Script & component
-        $this->WP->wp_enqueue_script( 'fab-design', 'build/js/backend/metabox-design.min.js', array(), '', true );
+        $this->WP->wp_enqueue_script_typescript( 'fab-design', 'assets/ts/metabox-design/metabox-design.ts', array(), FAB_VERSION, true );
     }
 
     /**
@@ -367,7 +367,7 @@ class MetaboxSetting extends Base implements Model_Interface {
         );
 
         // Enqueue Script & component
-        $this->WP->wp_enqueue_script( 'fab-trigger', 'build/js/backend/metabox-trigger.min.js', array(), '', true );
+        $this->WP->wp_enqueue_script_typescript( 'fab-trigger', 'assets/ts/metabox-trigger/metabox-trigger.ts', array(), FAB_VERSION, true );
     }
 
     /*

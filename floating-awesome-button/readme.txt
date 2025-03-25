@@ -4,7 +4,7 @@ Tags: sticky button, popup, call to action, conversion, marketing
 Requires at least: 4.5
 Tested up to: 6.7.2
 Requires PHP: 5.6
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 License: GPL-3.0
 License URI: http://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -174,6 +174,14 @@ Releases :
 * [changelog.txt](https://plugins.svn.wordpress.org/floating-awesome-button/trunk/changelog.txt)
 
 == Changelog ==
+
+= 2.2.0 (25.03.2025) =
+* Added Location Templates feature for more flexible button placement  
+* Added option to clone FAB rows for easier customization  
+* Added new location rule for conditional tags  
+* Integrated support for Contact Form 7  
+* Improved asset handling for optimized performance
+* Minor bug fixes
 
 = 2.1.0 (19.03.2025) =
 * Added new FAB with Template

@@ -17,6 +17,18 @@ class Constants {
     use \Fab\Plugin\Helper\Singleton;
 
     /**
+     * @access   protected
+     * @var      object    $config  Config object
+     */
+    protected $config;
+
+    /**
+     * @access   protected
+     * @var      object    $wp  WordPress helper instance
+     */
+    protected $wp;
+
+    /**
      * Constructor
      */
     public function __construct() {

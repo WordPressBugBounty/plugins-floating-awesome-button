@@ -33,12 +33,12 @@ class MetaboxLocation extends Base implements Model_Interface {
     }
 
     /**
-     * Eneque scripts @backend
+     * Enqueue scripts @backend
      *
      * @return  void
      * @var     array   $hook_suffix     The current admin page
      */
-    public function backend_enequeue_metabox_location( $hook_suffix ) {
+    public function enqueue_metabox_location( $hook_suffix ) {
         /** Grab Data */
         global $post, $wp_roles;
         $screen = $this->WP->getScreen();
@@ -71,46 +71,34 @@ class MetaboxLocation extends Base implements Model_Interface {
         }
 
         /** Add Inline Script */
+        $this->WP->wp_enqueue_script_typescript( 'fab-location', 'assets/ts/metabox-location/metabox-location.ts', array(), FAB_VERSION, true );
         $this->WP->wp_localize_script(
             'fab-local',
-            'FAB_METABOX_LOCATION', apply_filters( 'fab_backend_enequeue_metabox_location_localize',
+            'FAB_METABOX_LOCATION', apply_filters( 'fab_metabox_location_localize',
                 array(
                     'rest_url'            => esc_url_raw( rest_url() ),
-                    'post_types'          => get_post_types(
-                        array(
-                            'public'       => true,
-                            'show_in_rest' => true,
-                        ),
-                        'objects'
-                    ),
-                    'post_taxonomies' => get_taxonomies(
-                        array(
-                            'public' => true,
-                            'show_in_rest' => true,
-                        ),
-                    'objects'
-                    ),
-                    'excludes_post_types' => array( 'attachment' ),
                     'data'                => compact( 'locations' ),
                     'defaultOptions'      => array(
                         'operator' => FABMetaboxLocation::$operator,
                         'logic' => FABMetaboxLocation::$logic,
-                        'user' => [
-                            'roles' => array_keys($wp_roles->roles)
-                        ],
                     ),
-                    'objects' => array()
+                    'types' => array(),
+                    'integrations' => array(),
+                    'labels' => array(
+                        'rule_type' => __( 'Rule Type', 'floating-awesome-button' ),
+                        'rule_operator' => __( 'Rule Operator', 'floating-awesome-button' ),
+                        'rule_value' => __( 'Rule Value', 'floating-awesome-button' ),
+                        'rule_logic' => __( 'Rule Logic', 'floating-awesome-button' ),
+                        'invalid_rule' => __( 'Please check input, there are invalid location rules!', 'floating-awesome-button' ),
+                        'invalid_rule_title' => __( 'Error', 'floating-awesome-button' ),
+                        'placeholder' => __( '--choose--', 'floating-awesome-button' ),
+                    ),
                 )
             ),
         );
 
-        /** Enqueue */
-        $this->WP->wp_enqueue_script( 'fab-location', 'build/js/backend/metabox-location.min.js', array(), '', true );
-
-        /** Load Component */
-        $component = 'metabox-location';
-        $this->WP->wp_enqueue_style( sprintf('%s-component', $component), sprintf('build/components/%s/bundle.css', $component) );
-        $this->WP->wp_enqueue_script(sprintf('%s-component', $component), sprintf('build/components/%s/bundle.js', $component), array(), '1.0', true);
+        // Load Component.
+        $this->WP->wp_enqueue_script( 'metabox-location', 'build/components/metabox-location/bundle.js', array(), FAB_VERSION, true);
     }
 
     /**
@@ -134,18 +122,7 @@ class MetaboxLocation extends Base implements Model_Interface {
      * @return      string              Html template string from view View/Template/backend/metabox_location.php
      */
     public function metabox_location_callback() {
-        /** Set View */
-        $view = new View( $this->Plugin );
-        $view->setTemplate( 'backend.blank' );
-        $view->setSections(
-            array(
-                'Backend.Metabox.location' => array(
-                    'name'   => '',
-                    'active' => true,
-                ),
-            )
-        );
-        $view->build();
+        View::RenderStatic( 'Backend.Metabox.location' );
     }
 
     /*
@@ -161,7 +138,7 @@ class MetaboxLocation extends Base implements Model_Interface {
      */
     public function run() {
         /** @backend - Enqueue backend metabox location */
-        add_action( 'admin_enqueue_scripts', array( $this, 'backend_enequeue_metabox_location' ), 10, 1 );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_metabox_location' ), 10, 1 );
 
         /** @backend - Add Location metabox to Fab CPT */
         add_action( 'add_meta_boxes', array( $this, 'metabox_location' ), 10, 0 );

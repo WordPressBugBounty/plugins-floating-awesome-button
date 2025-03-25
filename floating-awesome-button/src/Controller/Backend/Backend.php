@@ -62,7 +62,7 @@ class Backend extends Base implements Model_Interface {
         /** Load Inline Script */
         $options = (object) ( $this->Helper->ArrayMergeRecursive( (array) $default, (array) $config ) );
 
-        $this->WP->wp_enqueue_script( 'fab-local', 'local/fab.js', array(), '', true );
+        $this->WP->wp_enqueue_script( 'fab-local', 'local/fab.js', array(), FAB_VERSION, true );
         $this->WP->wp_localize_script(
             'fab-local',
             'FAB_PLUGIN',
@@ -71,15 +71,21 @@ class Backend extends Base implements Model_Interface {
                 'version'        => FAB_VERSION,
                 'screen'         => FAB_SCREEN,
                 'path'           => json_decode(FAB_PATH),
-                'premium'        => $this->Helper->isPremiumPlan(),
+                'premium'        => \Fab\Plugin\Helper::getInstance()->isPremiumPlan(),
+                'upgrade_url'    => \Fab\Plugin\Helper::getInstance()->getUpgradeURL(),
                 'production'     => $this->Plugin->getConfig()->production,
                 'description'    => $this->Plugin->getConfig()->description,
                 'fontsJsonUrl'   => plugin_dir_url(__DIR__ . '/../../../..'). 'fonts.json',
                 'options'        => $options,
+                'rest_url'       => esc_url_raw( rest_url() ),
                 'defaultOptions' => array(
                     'layout' => Design::$layout,
                     'template' => Design::$template,
                     'font'  => Design::$font,
+                ),
+                'integrations'  => array(
+                    'plugin' => apply_filters('fab_plugin_integrations', array()),
+                    'theme' => apply_filters('fab_theme_integrations', array()),
                 ),
             )
         );
@@ -96,12 +102,12 @@ class Backend extends Base implements Model_Interface {
         }
 
         /** Load Plugin Assets */
-        $this->WP->wp_enqueue_style( 'fab', 'build/css/backend.min.css' );
-        $this->WP->wp_enqueue_script( 'fab', 'build/js/backend/plugin.min.js', array( 'wp-color-picker' ), '', true );
+        $this->WP->wp_enqueue_style_sass( 'fab', 'assets/css/backend/style.scss' );
+        $this->WP->wp_enqueue_script_typescript( 'fab', 'assets/ts/backend/plugin.ts', array( 'wp-color-picker' ), FAB_VERSION, true );
 
         // Load vite
         if ( defined( 'HMR_DEV' ) && HMR_DEV ) {
-            $this->WP->wp_enqueue_script( 'fab-vite', sprintf('http://localhost:%s/@vite/client', HMR_DEV_PORT), array(), '', true );
+            $this->WP->wp_enqueue_script( 'fab-vite', sprintf('http://localhost:%s/@vite/client', HMR_DEV_PORT), array(), FAB_VERSION, true );
         }
 
         /** Livereload */

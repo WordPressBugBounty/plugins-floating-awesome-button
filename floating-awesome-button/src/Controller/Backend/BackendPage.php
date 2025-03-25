@@ -58,7 +58,6 @@ class BackendPage extends Base implements Model_Interface {
         $default       = $this->Plugin->getConfig()->default;
         $config        = $this->WP->get_option( 'fab_config' );
         $options       = (object) ( $this->Helper->ArrayMergeRecursive( (array) $default, (array) $config ) );
-        $featureshooks = $plugin->getHelper()->FeatureHooksLists( $features['features'], $features['featureHooks'], $options );
 
         /** Section */
         $sections = array();
@@ -72,11 +71,12 @@ class BackendPage extends Base implements Model_Interface {
             $sections['Backend.feature'] = array( 'name' => 'Feature' );
         }
         $sections['Backend.setting'] = array(
-            'name'   => 'Setting',
+            'name'   => __( 'Setting', 'floating-awesome-button' ),
             'active' => true,
         );
-        $sections['Backend.module']  = array( 'name' => 'Module' );
-        $sections['Backend.about']   = array( 'name' => 'About' );
+        $sections['Backend.module']  = array( 'name' => __( 'Module', 'floating-awesome-button' ) );
+        $sections['Backend.integration']  = array( 'name' => __( 'Integration', 'floating-awesome-button' ) );
+        $sections['Backend.about']   = array( 'name' => __( 'About', 'floating-awesome-button' ) );
         $nav                         = array();
         foreach ( $sections as $key => $section ) {
             $section['slug'] = str_replace( 'Backend.', '', $key );
@@ -96,7 +96,7 @@ class BackendPage extends Base implements Model_Interface {
             $fab = $fab->getVars(); }
 
         /** Localize Script */
-        $this->WP->wp_enqueue_script( 'fab-local', 'local/fab.js', array(), '', true );
+        $this->WP->wp_enqueue_script( 'fab-local', 'local/fab.js', array(), FAB_VERSION, true );
         $this->WP->wp_localize_script(
             'fab-local',
             'FAB_SETTING',
@@ -107,21 +107,25 @@ class BackendPage extends Base implements Model_Interface {
                 'modules'       => $modules,
                 'fab_lists'     => $fab_lists,
                 'features'      => $features['features'],
-                'featuresHooks' => $featureshooks,
                 'nonce'         => array(
                     'clear'    => wp_create_nonce( 'clear-config' ),
                     'module'   => wp_create_nonce( 'module-config' ),
                     'setting'  => wp_create_nonce( 'wp_rest' ),
+                    'plugin_manager' => wp_create_nonce( 'plugin_manager' ),
                 ),
                 'url'           => array(
                     'upgrade' => $this->Helper->getUpgradeURL(),
+                ),
+                'labels' => array(
+                    'add' => __( 'Add Integration', 'floating-awesome-button' ),
+                    'remove' => __( 'Remove Integration', 'floating-awesome-button' ),
                 ),
             )
         );
 
         /** Load Component */
         $this->WP->wp_enqueue_style( 'fab-setting-component', 'build/components/setting/bundle.css' );
-        $this->WP->wp_enqueue_script( 'fab-setting-component', 'build/components/setting/bundle.js', array(), '1.0', true );
+        $this->WP->wp_enqueue_script( 'fab-setting-component', 'build/components/setting/bundle.js', array(), FAB_VERSION, true );
     }
 
     /*** Handle Page Submission */

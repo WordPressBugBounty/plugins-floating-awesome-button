@@ -52,7 +52,7 @@ class Frontend extends Base implements Model_Interface {
         }
 
         /** Load Inline Script */
-        $this->WP->wp_enqueue_script( 'fab-local', 'local/fab.js', array(), '', true );
+        $this->WP->wp_enqueue_script( 'fab-local', 'local/fab.js', array(), FAB_VERSION, true );
         $this->WP->wp_localize_script(
             'fab-local',
             'FAB_PLUGIN',
@@ -82,27 +82,27 @@ class Frontend extends Base implements Model_Interface {
         $this->WP->enqueue_assets( $config->fab_assets->frontend );
 
         /** Load Plugin Assets */
-        $this->WP->wp_enqueue_style( 'fab', 'build/css/frontend.min.css' );
-        $this->WP->wp_enqueue_script( 'fab', 'build/js/frontend/plugin.min.js', array(), '', true );
+        $this->WP->wp_enqueue_style_sass( 'fab', 'assets/css/frontend/style.scss' );
+        $this->WP->wp_enqueue_script_typescript( 'fab', 'assets/ts/frontend/plugin.ts', array(), FAB_VERSION, true );
 
         /** Load Components */
         foreach($fab_to_display as $component){
             $type = str_contains($component['type'], 'toast') ? 'toast' : $component['type'];
 
             $this->WP->wp_enqueue_style( sprintf('fab-%s-component', $type), sprintf('build/components/%s/bundle.css',$type) );
-            $this->WP->wp_enqueue_script(sprintf('fab-%s-component', $type), sprintf('build/components/%s/bundle.js', $type), array(), '1.0', true);
+            $this->WP->wp_enqueue_script(sprintf('fab-%s-component', $type), sprintf('build/components/%s/bundle.js', $type), array(), FAB_VERSION, true);
         }
 
         /** Load Special Plugin Components */
         $components = ['fab', 'readingbar'];
         foreach($components as $component){
             $this->WP->wp_enqueue_style( sprintf('fab-%s-component', $component), sprintf('build/components/%s/bundle.css', $component) );
-            $this->WP->wp_enqueue_script(sprintf('fab-%s-component', $component), sprintf('build/components/%s/bundle.js', $component), array(), '1.0', true);
+            $this->WP->wp_enqueue_script(sprintf('fab-%s-component', $component), sprintf('build/components/%s/bundle.js', $component), array(), FAB_VERSION, true);
         }
 
         /** Special Template/Styles */
-        if($options->fab_design->template->name==='shape'){ $this->WP->wp_enqueue_style( 'fab-shapes', sprintf('build/css/fab-shapes.min.css', $component) ); }
-        if(isset($fabTypes['modal'])){ $this->WP->wp_enqueue_style( 'fab-modal', sprintf('build/css/fab-modal.min.css', $component) ); }
+        if($options->fab_design->template->name==='shape'){ $this->WP->wp_enqueue_style_sass( 'fab-shapes', 'assets/css/fab-shapes/style.scss' ); }
+        if(isset($fabTypes['modal'])){ $this->WP->wp_enqueue_style_sass( 'fab-modal', 'assets/css/fab-modal/style.scss' ); }
 
         /** Livereload */
         if(function_exists('FAB_LoadComponentLiveReload')) { FAB_LoadComponentLiveReload($this); }

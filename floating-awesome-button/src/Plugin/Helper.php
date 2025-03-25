@@ -15,11 +15,13 @@ class Helper {
 
     /** Load Trait */
     use Helper\Directory;
-    use Helper\Text;
+    use Helper\Integration;
     use Helper\Option;
-    use Helper\Plan;
     use Helper\Operator;
+    use Helper\Plan;
     use Helper\Singleton;
+    use Helper\Template;
+    use Helper\Text;
 
     /**
      * Convert html relative path into absolute path

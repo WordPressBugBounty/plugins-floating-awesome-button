@@ -72,7 +72,7 @@ trait Asset {
             $src = sprintf('%sassets/%s', json_decode( FAB_PATH )->plugin_url, $src);
             if(!file_exists($file)) { return; }
         }
-        wp_enqueue_style( $handle, $src, $deps, $ver, $media );
+        wp_enqueue_style( $handle, $src, $deps, !$ver ? FAB_VERSION : $ver, $media );
     }
 
     /**
@@ -91,7 +91,7 @@ trait Asset {
             if(!file_exists($file)) { return; }
         }
 
-        wp_enqueue_script( $handle, $src, $deps, $ver, $in_footer );
+        wp_enqueue_script( $handle, $src, $deps, !$ver ? FAB_VERSION : $ver, $in_footer );
     }
 
     /**
@@ -101,14 +101,18 @@ trait Asset {
      * @var   string    $src        Full URL of the script, or path of the script relative to the WordPress root directory
      * @var   array     $deps       An array of registered script handles this script depends on
      * @var   string    $ver        String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes
+     * @var   bool      $in_footer      Whether to enqueue the script before </body> instead of in the <head>
      */
     public function wp_enqueue_script_component( $handle, $src = '', $deps = array(), $ver = false, $in_footer = false ) {
+        // Read manifest.json
+        $manifest = json_decode( file_get_contents( FAB_PLUGIN_PATH . 'assets/build/manifest.json' ) );
+
         // Check if HMR_DEV is true
         if ( defined( 'HMR_DEV' ) && HMR_DEV ) {
-            $src = str_replace( 'build/', 'assets/', $src );
-            $src = str_replace( 'bundle.js', 'main.js', $src );
-            $src = sprintf('http://localhost:%s/%s', HMR_DEV_PORT, $src);
+            $src = sprintf('http://localhost:%s/%s', HMR_DEV_PORT, $manifest->{$src}->src);
             $deps[] = 'fab-vite';
+        } else {
+            $src = 'build/' . $manifest->{$src}->file;
         }
 
         // Add module scripts
@@ -117,6 +121,38 @@ trait Asset {
             return $scripts;
         });
 
+        $this->wp_enqueue_script( $handle, $src, $deps, $ver, $in_footer );
+    }
+
+    /**
+     * WordPress enqueue style sass
+     *
+     * @var   string    $handle     Name of the script. Should be unique
+     * @var   string    $src        Full URL of the script, or path of the script relative to the WordPress root directory
+     * @var   array     $deps       An array of registered script handles this script depends on
+     * @var   string    $ver        String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes
+     * @var   string    $media      The media for which this stylesheet has been defined.
+     */
+    public function wp_enqueue_style_sass( $handle, $src = '', $deps = array(), $ver = false, $media = 'all' ) {
+        // Read manifest.json
+        $manifest = json_decode( file_get_contents( FAB_PLUGIN_PATH . 'assets/build/manifest-sass.json' ) );
+        $src = str_replace('assets/', '', $manifest->{$src});
+        $this->wp_enqueue_style( $handle, $src, $deps, $ver, $media );
+    }
+
+    /**
+     * WordPress enqueue script typescript
+     *
+     * @var   string    $handle     Name of the script. Should be unique
+     * @var   string    $src        Full URL of the script, or path of the script relative to the WordPress root directory
+     * @var   array     $deps       An array of registered script handles this script depends on
+     * @var   string    $ver        String specifying script version number, if it has one, which is added to the URL as a query string for cache busting purposes
+     * @var   bool      $in_footer      Whether to enqueue the script before </body> instead of in the <head>
+     */
+    public function wp_enqueue_script_typescript( $handle, $src = '', $deps = array(), $ver = false, $in_footer = false ) {
+        // Read manifest.json
+        $manifest = json_decode( file_get_contents( FAB_PLUGIN_PATH . 'assets/build/manifest.json' ) );
+        $src = 'build/' . $manifest->{$src}->file;
         $this->wp_enqueue_script( $handle, $src, $deps, $ver, $in_footer );
     }
 

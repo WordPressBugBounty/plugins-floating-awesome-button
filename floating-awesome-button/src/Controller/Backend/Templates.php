@@ -4,7 +4,7 @@ namespace Fab\Controller;
 
 use Fab\Interfaces\Model_Interface;
 use Fab\View;
-use Fab\Helper\Template as TemplateHelper;
+use Fab\Helper\FAB_Template;
 
 ! defined( 'WPINC ' ) or die;
 
@@ -76,6 +76,8 @@ class Templates extends Base implements Model_Interface {
                 'id' => $data->id,
                 'name' => $data->name,
                 'description' => $data->description,
+                'license' => $data->license,
+                'requires' => $data->requires ?? [],
                 'design' => array(
                     'color' => $data->design->color,
                     'icon' => array(
@@ -88,13 +90,16 @@ class Templates extends Base implements Model_Interface {
         }, $templates), 'array_merge', []);
 
         // Localize templates
-        $this->WP->wp_enqueue_script_component('fab-templates-component', 'build/components/templates/bundle.js', array(), '1.0', false);
+        $this->WP->wp_enqueue_script_component('fab-templates-component', 'assets/components/templates/main.js', array(), FAB_VERSION, false);
         $this->WP->wp_localize_script('fab-templates-component', 'FAB_TEMPLATES', array(
             'templates' => apply_filters('fab_templates', $templates),
             'labels' => array(
+                'add_new' => __('Add New', 'floating-awesome-button'),
+                'add_integration' => __('Add Integration', 'floating-awesome-button'),
                 'next' => __('Next', 'floating-awesome-button'),
                 'previous' => __('Previous', 'floating-awesome-button'),
                 'no_results' => __('No templates found matching your search.', 'floating-awesome-button'),
+                'upgrade' => __('Required Upgrade', 'floating-awesome-button'),
             )
         ));
 
@@ -126,8 +131,8 @@ class Templates extends Base implements Model_Interface {
         $data = json_decode(file_get_contents('php://input'));
 
         // Read template file
-        $data = file_get_contents(FAB_PLUGIN_PATH . 'templates/' . $data->id . '.json');
-        $data = json_decode($data);
+        $template = file_get_contents(FAB_PLUGIN_PATH . 'templates/' . $data->id . '.json');
+        $data = $this->Helper->ArrayMergeRecursive( json_decode($template), $data );
 
         // Transform template data
         try {
@@ -135,12 +140,12 @@ class Templates extends Base implements Model_Interface {
             $post_id = wp_insert_post(array(
                 'post_type' => 'fab',
                 'post_title' => $data->name,
-                'post_content' => TemplateHelper::getInstance()->get_content($data),
+                'post_content' => FAB_Template::getInstance()->get_content($data),
                 'post_status' => 'publish',
             ));
 
             // Add postmeta
-            $postmeta = TemplateHelper::getInstance()->transform_template_to_postmeta($data);
+            $postmeta = FAB_Template::getInstance()->transform_template_to_postmeta($data);
             foreach ($postmeta as $key => $value) {
                 update_post_meta($post_id, $key, $value);
             }

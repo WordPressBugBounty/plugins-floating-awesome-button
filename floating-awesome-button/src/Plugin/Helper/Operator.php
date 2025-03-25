@@ -14,6 +14,40 @@ namespace Fab\Plugin\Helper;
 trait Operator {
 
     /**
+     * Get operators by type
+     *
+     * @param string $type The type of operator to get.
+     * @return array The operators.
+     */
+    public function get_default_operators_by_type( $type ) {
+        $operators = array();
+
+        if(in_array($type, array('bool', 'number'))){
+            $operators[] = array(
+                'id'   => '==',
+                'text' => __( 'is equal to', 'floating-awesome-button' ),
+            );
+            $operators[] = array(
+                'id'   => '!=',
+                'text' => __( 'is not equal to', 'floating-awesome-button' ),
+            );
+        }
+
+        if(in_array($type, array('number'))){
+            $operators[] = array(
+                'id'   => '<',
+                'text' => __( 'is less than', 'floating-awesome-button' ),
+            );
+            $operators[] = array(
+                'id'   => '>',
+                'text' => __( 'is greater than', 'floating-awesome-button' ),
+            );
+        }
+
+        return $operators;
+    }
+
+    /**
      * Match locations setting when current displayed content is compared against a value.
      *
      * @param string $operator The comparison operator ('==', '!=', '<', '>', '<=', '>=').
