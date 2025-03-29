@@ -6,7 +6,7 @@ use Fab\Interfaces\Model_Interface;
 use Fab\View;
 use Fab\Metabox\FABMetaboxSetting;
 
-! defined( 'WPINC ' ) or die;
+! defined( 'WPINC ' ) || die;
 
 /**
  * Plugin hooks in a backend
@@ -17,95 +17,102 @@ use Fab\Metabox\FABMetaboxSetting;
 class Frontend extends Base implements Model_Interface {
 
     /**
-     * Eneque scripts to @frontend
+     * Enqueue scripts to @frontend
      *
-     * @return  void
-     * @var     array   $hook_suffix     The current admin page
+     * @param string $hook_suffix The current admin page.
+     * @return void
      */
     public function frontend_enequeue( $hook_suffix ) {
         global $post;
 
-        /** Default Variables */
-        define( 'FAB_SCREEN', json_encode( $this->WP->getScreen() ) );
-        $default = $this->Plugin->getConfig()->default;
-        $config  = $this->Plugin->getConfig()->options;
-        $options = (object) ( $this->Helper->ArrayMergeRecursive( (array) $default, (array) $config ) );
+        // Default Variables.
+        define( 'FAB_SCREEN', wp_json_encode( $this->WP->getScreen() ) );
+        $default  = $this->Plugin->getConfig()->default;
+        $config   = $this->Plugin->getConfig()->options;
+        $options  = (object) ( $this->Helper->ArrayMergeRecursive( (array) $default, (array) $config ) );
         $fabTypes = array();
 
-        /** Get FAB for JS Manipulation */
-        $fab_to_display = $this->Plugin->getModels()['Fab'];
-        $fab_to_display = $fab_to_display->get_lists_of_fab( array(
-            'validateLocation' => true,
-            'fab_preview' => $post->post_status === 'draft' && $post->post_type === 'fab' ? $post : false,
-        ) )['items'];
-        foreach($fab_to_display as &$fab){
-            $fabTypes[$fab->getType()] = $fab->getType();
-            if($fab->getModal()) { $fabTypes['modal'] = 'modal'; }
+        // Get FAB for JS Manipulation.
+        $fab_to_display = \Fab\Model\Fab::getInstance();
+        $fab_to_display = $fab_to_display->get_lists_of_fab()['items'];
+        foreach ( $fab_to_display as &$fab ) {
+            $fabTypes[ $fab->getType() ] = $fab->getType();
+            if ( $fab->getModal() ) {
+                $fabTypes['modal'] = 'modal';
+            }
             $fab = $fab->getVars();
         }
 
-        /** Get Features for JS Manipulation */
+        // Get Features for JS Manipulation.
         $features = $this->Plugin->getFeatures();
-        foreach($features as $key => &$feature){
+        foreach ( $features as $key => &$feature ) {
             $feature = $feature->getOptions();
-            if(!$feature) { unset($features[$key]); }
+            if ( ! $feature ) {
+                unset( $features[ $key ] );
+            }
         }
 
-        /** Load Inline Script */
+        // Load Inline Script.
         $this->WP->wp_enqueue_script( 'fab-local', 'local/fab.js', array(), FAB_VERSION, true );
         $this->WP->wp_localize_script(
             'fab-local',
             'FAB_PLUGIN',
             array(
-                'name'              => FAB_NAME,
-                'version'           => FAB_VERSION,
-                'screen'            => FAB_SCREEN,
-                'path'              => FAB_PATH,
-                'premium'           => $this->Helper->isPremiumPlan(),
-                'rest_url'          => esc_url_raw( rest_url() ),
-                'options'           => $options,
-                'to_display'        => $fab_to_display,
-                'features'          => $features,
-                'nonce'         => array(
-                    'clicked'  => wp_create_nonce( 'wp_rest' ),
+                'name'       => FAB_NAME,
+                'version'    => FAB_VERSION,
+                'screen'     => FAB_SCREEN,
+                'path'       => FAB_PATH,
+                'premium'    => $this->Helper->isPremiumPlan(),
+                'rest_url'   => esc_url_raw( rest_url() ),
+                'options'    => $options,
+                'to_display' => $fab_to_display,
+                'features'   => $features,
+                'nonce'      => array(
+                    'clicked' => wp_create_nonce( 'wp_rest' ),
                 ),
             )
         );
 
-        /** Load WP Core jQuery */
+        // Load WP Core jQuery.
         wp_enqueue_script( 'jquery' );
 
-        /** Load Vendors */
+        // Load Vendors.
         if ( isset( $config->fab_animation->enable ) && $config->fab_animation->enable ) {
             $this->WP->wp_enqueue_style( 'animatecss', 'vendor/animatecss/animate.min.css' );
         }
         $this->WP->enqueue_assets( $config->fab_assets->frontend );
 
-        /** Load Plugin Assets */
+        // Load Plugin Assets.
         $this->WP->wp_enqueue_style_sass( 'fab', 'assets/css/frontend/style.scss' );
         $this->WP->wp_enqueue_script_typescript( 'fab', 'assets/ts/frontend/plugin.ts', array(), FAB_VERSION, true );
 
-        /** Load Components */
-        foreach($fab_to_display as $component){
-            $type = str_contains($component['type'], 'toast') ? 'toast' : $component['type'];
+        // Load Components.
+        foreach ( $fab_to_display as $component ) {
+            $type = str_contains( $component['type'], 'toast' ) ? 'toast' : $component['type'];
 
-            $this->WP->wp_enqueue_style( sprintf('fab-%s-component', $type), sprintf('build/components/%s/bundle.css',$type) );
-            $this->WP->wp_enqueue_script(sprintf('fab-%s-component', $type), sprintf('build/components/%s/bundle.js', $type), array(), FAB_VERSION, true);
+            $this->WP->wp_enqueue_style( sprintf( 'fab-%s-component', $type ), sprintf( 'build/components/%s/bundle.css', $type ) );
+            $this->WP->wp_enqueue_script( sprintf( 'fab-%s-component', $type ), sprintf( 'build/components/%s/bundle.js', $type ), array(), FAB_VERSION, true );
         }
 
-        /** Load Special Plugin Components */
-        $components = ['fab', 'readingbar'];
-        foreach($components as $component){
-            $this->WP->wp_enqueue_style( sprintf('fab-%s-component', $component), sprintf('build/components/%s/bundle.css', $component) );
-            $this->WP->wp_enqueue_script(sprintf('fab-%s-component', $component), sprintf('build/components/%s/bundle.js', $component), array(), FAB_VERSION, true);
+        // Load Special Plugin Components.
+        $components = array( 'fab', 'readingbar' );
+        foreach ( $components as $component ) {
+            $this->WP->wp_enqueue_style( sprintf( 'fab-%s-component', $component ), sprintf( 'build/components/%s/bundle.css', $component ) );
+            $this->WP->wp_enqueue_script( sprintf( 'fab-%s-component', $component ), sprintf( 'build/components/%s/bundle.js', $component ), array(), FAB_VERSION, true );
         }
 
-        /** Special Template/Styles */
-        if($options->fab_design->template->name==='shape'){ $this->WP->wp_enqueue_style_sass( 'fab-shapes', 'assets/css/fab-shapes/style.scss' ); }
-        if(isset($fabTypes['modal'])){ $this->WP->wp_enqueue_style_sass( 'fab-modal', 'assets/css/fab-modal/style.scss' ); }
+        // Special Template/Styles.
+        if ( $options->fab_design->template->name === 'shape' ) {
+            $this->WP->wp_enqueue_style_sass( 'fab-shapes', 'assets/css/fab-shapes/style.scss' );
+        }
+        if ( isset( $fabTypes['modal'] ) ) {
+            $this->WP->wp_enqueue_style_sass( 'fab-modal', 'assets/css/fab-modal/style.scss' );
+        }
 
-        /** Livereload */
-        if(function_exists('FAB_LoadComponentLiveReload')) { FAB_LoadComponentLiveReload($this); }
+        // Livereload.
+        if ( function_exists( 'FAB_LoadComponentLiveReload' ) ) {
+            FAB_LoadComponentLiveReload( $this );
+        }
     }
 
     /**
@@ -116,37 +123,50 @@ class Frontend extends Base implements Model_Interface {
     public function fab_loader() {
         global $post;
 
-        /** Ignore in Pages */
-        if ( is_singular() && isset( $post->post_type ) && $post->post_type === 'fab' && $post->post_status !== 'draft') {
-            return;
-        }
-
-        /** Grab Data */
-        $Fab = $this->Plugin->getModels()['Fab'];
-        $args = array(
-            'validateLocation' => true,
+        // Grab Data.
+        $Fab            = \Fab\Model\Fab::getInstance();
+        $args           = array(
             'filtercustommodule' => true,
-            'fab_preview' => $post->post_status === 'draft' ? $post : false,
         );
-        $lists = $Fab->get_lists_of_fab( $args );
+        $lists          = $Fab->get_lists_of_fab( $args );
         $fab_to_display = $lists['items'];
 
-        /** Show FAB Button */
-        View::RenderStatic('Frontend.button');
+        // Show FAB Button.
+        View::RenderStatic( 'Frontend.button' );
 
-        /** Show Modal - Only Default */
+        // Show Modal - Only Default.
         if ( ! is_admin() && ( $fab_to_display ) ) {
             $args['builder'] = array( 'default' );
             $fab_to_display  = $Fab->get_lists_of_fab( $args )['items'];
-            View::RenderStatic('Frontend.modal',
+            View::RenderStatic(
+                'Frontend.modal',
                 compact( 'post', 'fab_to_display' )
             );
         }
     }
 
-    /** Register widgets */
+    /**
+     * Show FAB preview notice.
+     *
+     * @return void
+     */
+    public function fab_preview_notice() {
+        if ( $this->Helper->isPremiumPlan() && $this->Helper->is_preview_page() ) {
+            $notice = array(
+                'id'      => 'fab-preview-notice',
+                'message' => __( 'This is a preview of the FAB, all location rules will be ignored.', 'floating-awesome-button' ),
+            );
+            View::RenderStatic( 'Frontend.notice', compact( 'notice' ) );
+        }
+    }
+
+    /**
+     * Register widgets.
+     *
+     * @return void
+     */
     public function fab_register_widget() {
-        /** Grab Widgets Type */
+        // Grab Widgets Type.
         $types       = FABMetaboxSetting::$types;
         $widgetsType = array();
         foreach ( $types as $type ) {
@@ -157,20 +177,20 @@ class Frontend extends Base implements Model_Interface {
             }
         }
 
-        /** Grab FAB with widget type */
-        $Fab     = $this->Plugin->getModels()['Fab'];
+        // Grab FAB with widget type.
+        $Fab     = \Fab\Model\Fab::getInstance();
         $widgets = $Fab->get_lists_of_fab(
             array(
                 'filterbyType' => $widgetsType,
             )
         )['items'];
 
-        /** Register Sidebar */
+        // Register Sidebar.
         foreach ( $widgets as $widget ) {
             register_sidebar(
                 array(
-                    'name'          => __( $widget->getTitle(), sprintf( 'fab-widget-%s',  $widget->getSlug() ) ),
-                    'id'            => sprintf( 'fab-widget-%s',  $widget->getSlug() ),
+                    'name'          => __( $widget->getTitle(), sprintf( 'fab-widget-%s', $widget->getSlug() ) ),
+                    'id'            => sprintf( 'fab-widget-%s', $widget->getSlug() ),
                     'before_widget' => '<div id="%1$s" class="widget fab-container %2$s">',
                     'after_widget'  => '</div>',
                     'before_title'  => '<h3 class="widgettitle">',
@@ -182,6 +202,10 @@ class Frontend extends Base implements Model_Interface {
 
     /**
      * Filter wpkses posts accept iframe, used to embed iframe (youtube, vimeo, etc) with FAB Content
+     *
+     * @param array  $tags The tags to filter.
+     * @param string $context The context of the filter.
+     * @return array The filtered tags.
      */
     public function filter_wpkses_posts( $tags, $context ) {
         $tags['iframe'] = array(
@@ -192,41 +216,6 @@ class Frontend extends Base implements Model_Interface {
             'allowfullscreen' => true,
         );
         return $tags;
-    }
-
-    public function fab_preview_content( $template ) {
-        if ( is_preview() && get_post_type() === 'fab' ) {
-
-            // Get the path to the plugin root directory
-            $plugin_dir = dirname( plugin_dir_path( __FILE__ ), 3 ); // Move up 3 directories
-            $readme_path = $plugin_dir . '/readme.txt';
-
-            // Check if the readme.txt file exists
-            if ( file_exists( $readme_path ) ) {
-                // Read the content of the readme.txt file
-                $readme_content = file_get_contents( $readme_path );
-
-                // Extract content after '== Description =='
-                if ( preg_match( '/== Description ==\s+(.*?)(?:==|\Z)/s', $readme_content, $matches ) ) {
-                    $markdown_content = trim( $matches[1] );
-                } else {
-                    $markdown_content = 'Description not found in readme.txt.';
-                }
-
-                // Parse markdown manually
-                $custom_content = $this->Helper->parse_readme_to_html( $markdown_content );
-            } else {
-                $custom_content = '<p>Readme.txt file not found.</p>';
-            }
-
-            // Hook into the rendering process.
-            add_filter( 'the_content', function ( $content ) use ( $custom_content ) {
-                return $custom_content;
-            });
-
-            return $template;
-        }
-        return $template;
     }
 
     /*
@@ -241,19 +230,19 @@ class Frontend extends Base implements Model_Interface {
      * @return void
      */
     public function run() {
-        /** @frontend - Add Table Of Content Widget */
+        // Add table of content widget.
         add_action( 'widgets_init', array( $this, 'fab_register_widget' ) );
 
-        /** @frontend - Eneque scripts */
+        // Enqueue scripts.
         add_action( 'wp_enqueue_scripts', array( $this, 'frontend_enequeue' ), 20, 1 );
 
-        /** @frontend - Display the html element from view Frontend/float_button.php */
+        // Display the html element from view Frontend/float_button.php.
         add_action( 'wp_footer', array( $this, 'fab_loader' ), 10, 0 );
 
-        /** @frontend - Filter wpkses post */
-        add_filter( 'wp_kses_allowed_html', array( $this, 'filter_wpkses_posts' ), 10, 2 );
+        // Show FAB preview notice.
+        add_action( 'wp_footer', array( $this, 'fab_preview_notice' ), 10, 0 );
 
-        /** @frontend - Display preview content fab */
-        add_filter( 'template_include', array( $this, 'fab_preview_content' ), 10, 1 );
+        // Filter wpkses post.
+        add_filter( 'wp_kses_allowed_html', array( $this, 'filter_wpkses_posts' ), 10, 2 );
     }
 }

@@ -12,7 +12,6 @@ use Fab\Feature\Upsell;
  * @package    Fab
  * @subpackage Fab\Includes
  */
-
 class Plugin {
 
     // Load Traits.
@@ -121,7 +120,7 @@ class Plugin {
      */
     public function __construct() {
         /** Initiate Plugin */
-        $this->config = \Fab\Plugin\Config::getInstance()->getConfig();
+        $this->config      = \Fab\Plugin\Config::getInstance()->getConfig();
         $this->name        = $this->config->name;
         $this->slug        = strtolower( $this->config->name );
         $this->slug        = str_replace( ' ', '-', $this->slug );
@@ -135,7 +134,7 @@ class Plugin {
         $this->Form        = new Form();
         $this->WP          = \Fab\Wordpress\Helper::getInstance();
         /** Init Config */
-        $this->path            = $this->WP->getPath( $this->config->path );
+        $this->path = $this->WP->getPath( $this->config->path );
     }
 
     /**
@@ -151,7 +150,7 @@ class Plugin {
         $this->loadFeatures();
         $this->loadHooks( 'Controller' );
         $this->loadHooks( 'Api' );
-        $this->loadModulesHooks();
+        $this->load_modules_hooks();
     }
 
     /**
@@ -160,9 +159,9 @@ class Plugin {
      * @return  void
      */
     public function activate() {
-        $activatables = array_merge($this->controllers, $this->apis);
-        foreach ($activatables as $activatable) {
-            if (method_exists($activatable, 'activate')) {
+        $activatables = array_merge( $this->controllers, $this->apis );
+        foreach ( $activatables as $activatable ) {
+            if ( method_exists( $activatable, 'activate' ) ) {
                 $activatable->activate();
             }
         }
@@ -174,9 +173,9 @@ class Plugin {
      * @return  void
      */
     public function deactivate() {
-        $deactivatables = array_merge($this->controllers, $this->apis);
-        foreach ($deactivatables as $deactivatable) {
-            if (method_exists($deactivatable, 'deactivate')) {
+        $deactivatables = array_merge( $this->controllers, $this->apis );
+        foreach ( $deactivatables as $deactivatable ) {
+            if ( method_exists( $deactivatable, 'deactivate' ) ) {
                 $deactivatable->deactivate();
             }
         }
@@ -197,19 +196,17 @@ class Plugin {
             $name  = basename( $model, '.php' );
             $model = '\\Fab\\Model\\' . $name;
             $model = new $model( $this );
-            /** Build */
+
+            // Build model.
             $args          = $model->getArgs();
             $args['build'] = ( isset( $args['build'] ) ) ? $args['build'] : true;
             if ( $args['build'] ) {
                 $model->build();
             }
-            /** Run Hooks */
-            $this->models[ $name ] = $model;
-            foreach ( $model->getHooks() as $hook ) {
-                $class = str_replace( 'Fab\\Wordpress\\Hook\\', '', get_class( $hook ) );
-                if ( in_array( strtolower( $class ), $this->enableHooks ) ) {
-                    $hook->run();
-                }
+
+            // Run model run method.
+            if ( method_exists( $model, 'run' ) ) {
+                $model->run();
             }
         }
     }
@@ -231,7 +228,7 @@ class Plugin {
             $feature                              = '\\Fab\\Feature\\' . $name;
             $feature                              = new $feature();
             $this->features[ $feature->getKey() ] = $feature;
-            if (method_exists($feature, 'run')) {
+            if ( method_exists( $feature, 'run' ) ) {
                 $feature->run();
             }
         }
@@ -240,17 +237,22 @@ class Plugin {
 
     /**
      * Load Modules Hook
+     *
+     * @return void
      */
-    public function loadModulesHooks(){
-        $modules = [];
-        $allow = array( '.', '..', '.DS_Store', 'index.php' );
-        foreach($this->Helper->getDirFiles( $this->path['plugin_path'] . 'src/Helper/FABModule' ) as $module){
-            if ( in_array( basename( $module ), $allow ) ) { continue; }
-            $name = basename( $module, '.php' );
-            $class = '\\Fab\\Module\\' . $name;
-            if( method_exists($class, 'loadHooks') ) {
-                $modules[ $name ] = new $class();
-                foreach ( $modules[ $name ]->getHooks() as $hook ) { $hook->run(); }
+    public function load_modules_hooks() {
+        $modules = array();
+        $allow   = array( '.', '..', '.DS_Store', 'index.php' );
+        foreach ( $this->Helper->getDirFiles( $this->path['plugin_path'] . 'src/Helper/FABModule' ) as $module ) {
+            if ( in_array( basename( $module ), $allow ) ) {
+                continue;
+            }
+            $name   = basename( $module, '.php' );
+            $module = '\\Fab\\Module\\' . $name;
+            $module = new $module();
+
+            if ( method_exists( $module, 'run' ) ) {
+                $module->run();
             }
         }
     }
@@ -258,13 +260,15 @@ class Plugin {
     /**
      * Get FAB Modules
      */
-    public function getModules(){
-        $modules = [];
-        $allow = array( '.', '..', '.DS_Store', 'index.php' );
-        foreach($this->Helper->getDirFiles( $this->path['plugin_path'] . 'src/Helper/FABModule' ) as $module){
-            if ( in_array( basename( $module ), $allow ) ) { continue; }
-            $name = basename( $module, '.php' );
-            $class = '\\Fab\\Module\\' . $name;
+    public function getModules() {
+        $modules = array();
+        $allow   = array( '.', '..', '.DS_Store', 'index.php' );
+        foreach ( $this->Helper->getDirFiles( $this->path['plugin_path'] . 'src/Helper/FABModule' ) as $module ) {
+            if ( in_array( basename( $module ), $allow ) ) {
+                continue;
+            }
+            $name             = basename( $module, '.php' );
+            $class            = '\\Fab\\Module\\' . $name;
             $modules[ $name ] = new $class();
         }
         return $modules;
@@ -294,29 +298,12 @@ class Plugin {
                 $this->apis[ $name ] = $controller;
             }
 
-            if (method_exists($controller, 'initialize')) {
+            if ( method_exists( $controller, 'initialize' ) ) {
                 $controller->initialize();
             }
 
-            if (method_exists($controller, 'run')) {
+            if ( method_exists( $controller, 'run' ) ) {
                 $controller->run();
-            }
-
-            foreach ( $controller->getHooks() as $hook ) {
-                $class = str_replace( 'Fab\\Wordpress\\Hook\\', '', get_class( $hook ) );
-                if ( in_array( strtolower( $class ), $this->enableHooks ) ) {
-                    $namespace    = ( new \ReflectionClass( $hook->getComponent() ) )->getNamespaceName();
-                    $namespaceKey = str_replace( '\\', '_', strtolower( $namespace ) );
-                    $hookName     = preg_replace( '/[^A-Za-z0-9_]/', '', strtolower( $hook->getHook() ) );
-                    $callbackName = preg_replace( '/[^A-Za-z0-9_]/', '', strtolower( $hook->getCallback() ) );
-                    $key          = sprintf( 'hooks_%s_%s_%s_%s', $namespaceKey, strtolower( $name ), $hookName, $callbackName );
-                    $status       = ( isset( $this->config->options->fab_hooks->$key ) ) ? $this->config->options->fab_hooks->$key : $hook->isStatus(); // Option Exists
-                    $status       = ( $status==='true' || $status=='1' ) ? true : false; // Grab option status
-                    if ( $status == false && ! $hook->isMandatory() ) {
-                        continue; // Check plugin isMandatory
-                    }
-                    $hook->run();
-                }
             }
         }
     }
@@ -492,16 +479,14 @@ class Plugin {
     /**
      * @return object
      */
-    public function getForm(): Form
-    {
+    public function getForm(): Form {
         return $this->Form;
     }
 
     /**
      * @param object $Form
      */
-    public function setForm(Form $Form): void
-    {
+    public function setForm( Form $Form ): void {
         $this->Form = $Form;
     }
 
@@ -518,5 +503,4 @@ class Plugin {
     public function setWP( Wordpress\Helper $WP ): void {
         $this->WP = $WP;
     }
-
 }

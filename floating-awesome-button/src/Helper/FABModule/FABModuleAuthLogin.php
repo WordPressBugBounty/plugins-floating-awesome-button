@@ -2,20 +2,24 @@
 
 namespace Fab\Module;
 
-! defined( 'WPINC ' ) or die;
-
-/**
- * Plugin hooks in a backend
- * setComponent
- *
- * @package    Fab
- * @subpackage Fab/Controller
- */
+! defined( 'WPINC ' ) || die;
 
 use FAB\Plugin;
 use Fab\View;
 
+/**
+ * FAB Module Auth Login.
+ *
+ * @package    Fab
+ * @subpackage Fab/Module
+ */
 class FABModuleAuthLogin extends FABModule {
+    /**
+     * Type.
+     *
+     * @var string
+     */
+    public static $type = 'auth_login';
 
     /**
      * Module construect
@@ -29,9 +33,12 @@ class FABModuleAuthLogin extends FABModule {
         $this->description = 'Popup Auth Login';
     }
 
-    /** Render Module */
-    public function render(){
-        View::RenderStatic('Frontend.Module.login');
+    /**
+     * Render Module.
+     *
+     * @return void
+     */
+    public function render() {
+        View::RenderStatic( 'Frontend.Module.login' );
     }
-
 }

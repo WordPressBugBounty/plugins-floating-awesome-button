@@ -75,7 +75,7 @@ class Featured_Product extends Base implements Model_Interface {
         $new_children = array(
             array(
                 'id'         => 'featured_product',
-                'dependency' => 'woocommerce/woocommerce.php',
+                'dependency' => FAB_WOOCOMMERCE_PLUGIN_FILE,
                 'text'       => 'Featured Product',
             ),
         );
@@ -228,13 +228,15 @@ class Featured_Product extends Base implements Model_Interface {
      * @param object $data The data.
      */
     public function filter_template_postmeta($postmeta, $type, $data){
-        // Check if woocommerce is active
-        if(!class_exists('WooCommerce')){
+        // Check if woocommerce is active and type is featured product
+        if(!class_exists('WooCommerce') || 'featured_product' !== $type){
             return $postmeta;
         }
 
-        // Check if type is featured product
-        if($type === 'featured_product'){
+        // Check if product id is set
+        if( isset($data->product_id) ){
+            $postmeta['fab_setting_woocommerce_featured_product'] = $data->product_id;
+        } else {
             // Get product with most sales
             $args = array(
                 'post_type' => 'product',
@@ -265,6 +267,56 @@ class Featured_Product extends Base implements Model_Interface {
         return $postmeta;
     }
 
+    /**
+     * Add convert product to FAB action to FAB post type row actions
+     *
+     * @param array   $actions Array of row action links
+     * @param WP_Post $post   The post object
+     * @return array
+     */
+    public function add_fab_convert_product_action($actions, $post) {
+        if ($post->post_type === 'product') {
+            $actions['fab_convert_product'] = sprintf(
+                '<a href="%s">%s</a>',
+                wp_nonce_url(
+                    admin_url('admin.php?action=fab_convert_product&product_id=' . $post->ID),
+                    'fab_convert_product_' . $post->ID
+                ),
+                __('Turn into FAB', 'floating-awesome-button')
+            );
+        }
+        return $actions;
+    }
+
+    /**
+     * Handle the conversion of product to FAB
+     *
+     * @return void
+     */
+    public function convert_product_to_fab() {
+        // Check if post ID is provided
+        $product_id = isset($_GET['product_id']) ? intval($_GET['product_id']) : 0;
+
+        // Verify nonce
+        if (!wp_verify_nonce($_GET['_wpnonce'], 'fab_convert_product_' . $product_id)) {
+            wp_die(__('Security check failed', 'floating-awesome-button'));
+        }
+
+        // Add new fab
+        $result = \Fab\Helper\FAB_Template::getInstance()->add_new_fab(
+            (object) array( 'id' => 'woocommerce-featured-product', 'product_id' => $product_id )
+        );
+
+        // Check if there's an error
+        if( is_wp_error($result) ){
+            wp_die(esc_html($result->get_error_message()));
+        }
+
+        // Redirect to FAB edit page
+        wp_redirect(admin_url('post.php?post=' . $result . '&action=edit'));
+        exit;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Fulfill implemented interface contracts
@@ -280,8 +332,8 @@ class Featured_Product extends Base implements Model_Interface {
         // @backend - Add fab setting types
         add_filter( 'fab_setting_types', array( $this, 'add_fab_setting_types' ), 10, 1 );
 
-        // Prevent error if woocommerce plugin is not active.
-        if( !is_plugin_active('woocommerce/woocommerce.php') ){
+        // Prevent error if WooCommerce plugin is not active.
+        if( !is_plugin_active( FAB_WOOCOMMERCE_PLUGIN_FILE ) ){
             return;
         }
 
@@ -302,5 +354,12 @@ class Featured_Product extends Base implements Model_Interface {
 
         // @backend - Filter template postmeta
         add_filter( 'fab_template_postmeta', array( $this, 'filter_template_postmeta' ), 10, 3 );
+
+        // Check if WooCommerce integration is enabled
+        if( \Fab\Plugin\Helper::getInstance()->check_plugin_integration( FAB_WOOCOMMERCE_PLUGIN_FILE ) === 'enabled' ){
+            // Add convert product to product row action
+            add_filter('post_row_actions', array($this, 'add_fab_convert_product_action'), 10, 2);
+            add_action('admin_action_fab_convert_product', array($this, 'convert_product_to_fab'));
+        }
     }
 }

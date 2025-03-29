@@ -61,14 +61,14 @@ class Quick_Purchase extends Base implements Model_Interface {
      * @param array $input Existing input settings.
      * @return array Modified input settings with new WooCommerce settings.
      */
-    public function add_fab_setting_input($input) {
+    public function add_fab_setting_input( $input ) {
         // Define new WooCommerce input settings.
         $woocommerce_settings = array(
-            'fab_setting_woocommerce_quick_purchase'     => array('default' => ''),
+            'fab_setting_woocommerce_quick_purchase' => array( 'default' => '' ),
         );
 
         // Merge new settings into the existing inputs.
-        return array_merge($input, $woocommerce_settings);
+        return array_merge( $input, $woocommerce_settings );
     }
 
     /**
@@ -77,7 +77,7 @@ class Quick_Purchase extends Base implements Model_Interface {
      * @param array $post_metas Existing post meta settings.
      * @return array Modified post meta settings with new WooCommerce meta.
      */
-    public function add_fab_setting_post_metas($post_metas) {
+    public function add_fab_setting_post_metas( $post_metas ) {
         // Define new WooCommerce post meta settings.
         $woocommerce_post_metas = array(
             'woocommerce_quick_purchase' => array(
@@ -86,7 +86,7 @@ class Quick_Purchase extends Base implements Model_Interface {
         );
 
         // Merge new post meta settings into the existing post metas.
-        return array_merge($post_metas, $woocommerce_post_metas);
+        return array_merge( $post_metas, $woocommerce_post_metas );
     }
 
     /**
@@ -98,23 +98,23 @@ class Quick_Purchase extends Base implements Model_Interface {
      */
     public function add_backend_enequeue_metabox_setting_localize( $data ) {
         // Label
-        $data['labels']['setting']['woocommerce']['quick_purchase'] = array (
-            'text' => __( 'Action', 'floating-awesome-button' ),
+        $data['labels']['setting']['woocommerce']['quick_purchase'] = array(
+            'text'    => __( 'Action', 'floating-awesome-button' ),
             'tooltip' => __( 'Action for quick purchase', 'floating-awesome-button' ),
             'options' => array(
                 array(
-                    'id' => 'fab_add_to_cart',
+                    'id'   => 'fab_add_to_cart',
                     'text' => __( 'Add to cart', 'floating-awesome-button' ),
                 ),
                 array(
-                    'id' => 'fab_buy_now',
+                    'id'   => 'fab_buy_now',
                     'text' => __( 'Buy now', 'floating-awesome-button' ),
-                )
-            )
+                ),
+            ),
         );
 
         // Data
-        $quick_purchase_id = $this->WP->get_post_meta( $data['data']['fab']['ID'], FABMetaboxSetting::get_post_metas()['woocommerce_quick_purchase']['meta_key'], true );
+        $quick_purchase_id                                    = $this->WP->get_post_meta( $data['data']['fab']['ID'], FABMetaboxSetting::get_post_metas()['woocommerce_quick_purchase']['meta_key'], true );
         $data['data']['fab']['woocommerce']['quick_purchase'] = $quick_purchase_id;
 
         return $data;
@@ -125,16 +125,16 @@ class Quick_Purchase extends Base implements Model_Interface {
      *
      * @param object $instance The FAB item instance.
      */
-    public function add_fab_item_data( $instance ){
+    public function add_fab_item_data( $instance ) {
 
-        if('quick_purchase' === $instance->getType()){
+        if ( 'quick_purchase' === $instance->getType() ) {
             $quick_purchase_id = $this->WP->get_post_meta( $instance->getID(), FABMetaboxSetting::get_post_metas()['woocommerce_quick_purchase']['meta_key'], true );
-            $product_id = 0;
-            $instance->setToBeDisplayed(false);
+            $product_id        = 0;
+            $instance->setToBeDisplayed( false );
 
-            if( is_product() ){
+            if ( is_product() ) {
                 $product_id = get_the_ID();
-                $instance->setToBeDisplayed(true);
+                $instance->setToBeDisplayed( true );
             }
 
             $instance->setLink( add_query_arg( $quick_purchase_id, $product_id, home_url( add_query_arg( null, null ) ) ) );
@@ -153,14 +153,14 @@ class Quick_Purchase extends Base implements Model_Interface {
      */
     public function quick_purchase_from_url() {
         // Determine the parameter and its corresponding redirect URL
-        $actions = [
+        $actions = array(
             'fab_add_to_cart' => wc_get_cart_url(),
-            'fab_buy_now' => wc_get_checkout_url()
-        ];
+            'fab_buy_now'     => wc_get_checkout_url(),
+        );
 
         foreach ( $actions as $param => $redirect_url ) {
-            if ( isset( $_GET[$param] ) && ! empty( $_GET[$param] ) ) {
-                $product_id = sanitize_text_field( wp_unslash( $_GET[$param] ) );
+            if ( isset( $_GET[ $param ] ) && ! empty( $_GET[ $param ] ) ) {
+                $product_id = sanitize_text_field( wp_unslash( $_GET[ $param ] ) );
 
                 // If "fab_buy_now", empty the cart before adding the product
                 if ( $param === 'fab_buy_now' ) {
@@ -180,22 +180,50 @@ class Quick_Purchase extends Base implements Model_Interface {
     /**
      * Filter the FAB template to postmeta.
      *
-     * @param array $postmeta The postmeta.
+     * @param array  $postmeta The postmeta.
      * @param string $type The type of FAB.
      * @param object $data The data.
      */
-    public function filter_template_postmeta($postmeta, $type, $data){
+    public function filter_template_postmeta( $postmeta, $type, $data ) {
         // Check if woocommerce is active
-        if(!class_exists('WooCommerce')){
+        if ( ! class_exists( 'WooCommerce' ) ) {
             return $postmeta;
         }
 
         // Get setting quick purchase
-        if($type === 'quick_purchase'){
-            $postmeta['fab_setting_woocommerce_quick_purchase'] = isset($data->settings->quick_purchase) ? $data->settings->quick_purchase : '';
+        if ( $type === 'quick_purchase' ) {
+            $postmeta['fab_setting_woocommerce_quick_purchase'] = isset( $data->settings->quick_purchase ) ? $data->settings->quick_purchase : '';
         }
 
         return $postmeta;
+    }
+
+    /**
+     * Filter the FAB post row action url.
+     *
+     * @param string $url The url.
+     * @param string $type The type of FAB.
+     * @param object $post The post.
+     */
+    public function filter_fab_post_row_action_url( $url, $type, $post ) {
+        if ( 'quick_purchase' === $type ) {
+            // Get recent product.
+            $args     = array(
+                'post_type'      => 'product',
+                'posts_per_page' => 1,
+            );
+            $products = get_posts( $args );
+
+            // If no product, return.
+            if ( empty( $products ) ) {
+                return $url;
+            }
+
+            // Get product permalink.
+            return get_permalink( $products[0]->ID );
+        }
+
+        return $url;
     }
 
     /*
@@ -214,7 +242,7 @@ class Quick_Purchase extends Base implements Model_Interface {
         add_filter( 'fab_setting_types', array( $this, 'add_fab_setting_types' ), 10, 1 );
 
         // Prevent error if woocommerce plugin is not active.
-        if( !is_plugin_active('woocommerce/woocommerce.php') ){
+        if ( ! is_plugin_active( FAB_WOOCOMMERCE_PLUGIN_FILE ) ) {
             return;
         }
 
@@ -235,5 +263,8 @@ class Quick_Purchase extends Base implements Model_Interface {
 
         // @backend - Filter template postmeta
         add_filter( 'fab_template_postmeta', array( $this, 'filter_template_postmeta' ), 10, 3 );
+
+        // Filter FAB post row action url.
+        add_filter( 'fab_post_row_action_preview_url', array( $this, 'filter_fab_post_row_action_url' ), 10, 3 );
     }
 }

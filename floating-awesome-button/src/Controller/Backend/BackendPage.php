@@ -2,17 +2,17 @@
 
 namespace Fab\Controller;
 
+defined( 'WPINC' ) || die;
+
 use Fab\Interfaces\Model_Interface;
 use Fab\View;
 
-! defined( 'WPINC ' ) or die;
-
 /**
-* Initiate plugins
-*
-* @package    Fab
-* @subpackage Fab/Controller
-*/
+ * Initiate plugins
+ *
+ * @package    Fab
+ * @subpackage Fab/Controller
+ */
 class BackendPage extends Base implements Model_Interface {
 
     /**
@@ -39,12 +39,12 @@ class BackendPage extends Base implements Model_Interface {
      * @return  void
      */
     public function page_setting() {
-        /** Grab Data */
-        $plugin        = \Fab\Plugin::getInstance();
-        $slug          = sprintf( '%s-setting', $this->Plugin->getSlug() );
-        $features      = $this->page_setting_features();
+        // Grab Data.
+        $plugin   = \Fab\Plugin::getInstance();
+        $slug     = sprintf( '%s-setting', $this->Plugin->getSlug() );
+        $features = $this->page_setting_features();
 
-        /** Ignored setting in production */
+        // Ignored setting in production.
         $ignored = array( 'core_asset' );
         foreach ( $ignored as $key ) {
             if ( $this->Plugin->getConfig()->production ) {
@@ -52,83 +52,89 @@ class BackendPage extends Base implements Model_Interface {
             }
         }
 
-        /** Handle form submission */
+        // Handle form submission.
         $this->page_setting_submission( $slug, $features );
 
-        $default       = $this->Plugin->getConfig()->default;
-        $config        = $this->WP->get_option( 'fab_config' );
-        $options       = (object) ( $this->Helper->ArrayMergeRecursive( (array) $default, (array) $config ) );
+        $default = $this->Plugin->getConfig()->default;
+        $config  = $this->WP->get_option( 'fab_config' );
+        $options = (object) ( $this->Helper->ArrayMergeRecursive( (array) $default, (array) $config ) );
 
-        /** Section */
+        // Section.
         $sections = array();
 
-        /** Set View */
+        // Set View.
         View::RenderStatic( 'Backend.setting' );
 
-        /** Data Normalization Before Send to Component */
-        /** Section */
+        // Data Normalization Before Send to Component.
+        // Section.
         if ( ! $this->Plugin->getConfig()->production ) {
             $sections['Backend.feature'] = array( 'name' => 'Feature' );
         }
-        $sections['Backend.setting'] = array(
+        $sections['Backend.setting']     = array(
             'name'   => __( 'Setting', 'floating-awesome-button' ),
             'active' => true,
         );
-        $sections['Backend.module']  = array( 'name' => __( 'Module', 'floating-awesome-button' ) );
-        $sections['Backend.integration']  = array( 'name' => __( 'Integration', 'floating-awesome-button' ) );
-        $sections['Backend.about']   = array( 'name' => __( 'About', 'floating-awesome-button' ) );
-        $nav                         = array();
+        $sections['Backend.module']      = array( 'name' => __( 'Module', 'floating-awesome-button' ) );
+        $sections['Backend.integration'] = array( 'name' => __( 'Integration', 'floating-awesome-button' ) );
+        $sections['Backend.about']       = array( 'name' => __( 'About', 'floating-awesome-button' ) );
+        $nav                             = array();
         foreach ( $sections as $key => $section ) {
             $section['slug'] = str_replace( 'Backend.', '', $key );
             $nav[]           = $section;
         }
-        /** Modules */
+        // Modules.
         $modules = array();
         foreach ( $plugin->getModules() as $module ) {
             $modules[] = $module->getVars(); }
-        /** Features */
+        // Features.
         foreach ( $features['features'] as &$feature ) {
             $feature = $feature->getVars(); }
-        /** Get FAB for JS Manipulation */
-        $fab_lists = $this->Plugin->getModels()['Fab'];
+        // Get FAB for JS Manipulation.
+        $fab_lists = \Fab\Model\Fab::getInstance();
         $fab_lists = $fab_lists->get_lists_of_fab();
         foreach ( $fab_lists['items'] as &$fab ) {
             $fab = $fab->getVars(); }
 
-        /** Localize Script */
+        // Localize Script.
         $this->WP->wp_enqueue_script( 'fab-local', 'local/fab.js', array(), FAB_VERSION, true );
         $this->WP->wp_localize_script(
             'fab-local',
             'FAB_SETTING',
             array(
-                'status'        => false,
-                'config'        => $this->Plugin->getConfig(),
-                'sections'      => $nav,
-                'modules'       => $modules,
-                'fab_lists'     => $fab_lists,
-                'features'      => $features['features'],
-                'nonce'         => array(
-                    'clear'    => wp_create_nonce( 'clear-config' ),
-                    'module'   => wp_create_nonce( 'module-config' ),
-                    'setting'  => wp_create_nonce( 'wp_rest' ),
+                'status'    => false,
+                'config'    => $this->Plugin->getConfig(),
+                'sections'  => $nav,
+                'modules'   => $modules,
+                'fab_lists' => $fab_lists,
+                'features'  => $features['features'],
+                'nonce'     => array(
+                    'clear'          => wp_create_nonce( 'clear-config' ),
+                    'module'         => wp_create_nonce( 'module-config' ),
+                    'setting'        => wp_create_nonce( 'wp_rest' ),
                     'plugin_manager' => wp_create_nonce( 'plugin_manager' ),
                 ),
-                'url'           => array(
+                'url'       => array(
                     'upgrade' => $this->Helper->getUpgradeURL(),
                 ),
-                'labels' => array(
-                    'add' => __( 'Add Integration', 'floating-awesome-button' ),
+                'labels'    => array(
+                    'add'    => __( 'Add Integration', 'floating-awesome-button' ),
                     'remove' => __( 'Remove Integration', 'floating-awesome-button' ),
                 ),
             )
         );
 
-        /** Load Component */
+        // Load Component.
         $this->WP->wp_enqueue_style( 'fab-setting-component', 'build/components/setting/bundle.css' );
         $this->WP->wp_enqueue_script( 'fab-setting-component', 'build/components/setting/bundle.js', array(), FAB_VERSION, true );
     }
 
-    /*** Handle Page Submission */
+    /**
+     * Handle Page Submission
+     *
+     * @param string $slug     The slug of the page.
+     * @param array  $features The features of the page.
+     * @return void
+     */
     public function page_setting_submission( $slug, $features ) {
         if ( isset( $_GET['page'] ) && $_GET['page'] == $slug && $_POST ) {
             if ( isset( $_POST['clear-config'] ) ) { /** Clear Config */
@@ -141,7 +147,11 @@ class BackendPage extends Base implements Model_Interface {
         }
     }
 
-    /** Clear Config */
+    /**
+     * Clear Config
+     *
+     * @return void
+     */
     public function page_setting_submission_clearconfig() {
         $plugin  = \Fab\Plugin::getInstance();
         $modules = $plugin->getModules();
@@ -156,7 +166,11 @@ class BackendPage extends Base implements Model_Interface {
         }
     }
 
-    /** Save Module Config */
+    /**
+     * Save Module Config
+     *
+     * @return void
+     */
     public function page_setting_submission_module() {
         $params = $_POST;
         foreach ( $params as $key => $options ) {
@@ -166,15 +180,21 @@ class BackendPage extends Base implements Model_Interface {
         }
     }
 
-    /** Save Plugin Setting */
+    /**
+     * Save Plugin Setting
+     *
+     * @param array $features The features of the page.
+     * @param array $params   The params of the page.
+     * @return void
+     */
     public function page_setting_submission_setting( $features, $params = array() ) {
         $default = $this->Plugin->getConfig()->default;
         $options = $this->Plugin->getConfig()->options;
 
-        // Use POST data if provided, otherwise use the provided $params
-        $params = !empty($params) ? $params : $_POST;
+        // Use POST data if provided, otherwise use the provided $params.
+        $params = ! empty( $params ) ? $params : $_POST;
 
-        /** Sanitize & Transform Animation */
+        // Sanitize & Transform Animation.
         if ( isset( $params['fab_animation'] ) ) {
             $feature = $features['features']['core_animation'];
             $feature->sanitize();
@@ -183,7 +203,7 @@ class BackendPage extends Base implements Model_Interface {
             $options->fab_animation = $feature->transform();
         }
 
-        /** Sanitize & Transform Assets */
+        // Sanitize & Transform Assets.
         if ( isset( $params['fab_assets'] ) && isset( $features['features']['core_asset'] ) ) {
             $feature = $features['features']['core_asset'];
             $feature->sanitize();
@@ -192,38 +212,38 @@ class BackendPage extends Base implements Model_Interface {
             $options->fab_assets = $feature->transform();
         }
 
-        /** Sanitize & Transform Order */
+        // Sanitize & Transform Order.
         if ( isset( $params['fab_design'] ) ) {
             $feature       = $features['features']['core_design'];
             $featureOption = ( isset( $options->fab_design ) ) ? $options->fab_design : $default->fab_design;
             $feature->setOptions( $featureOption );
             $feature->sanitize();
             // merge with default template to prevent error on frontend.
-            $options->fab_design = json_decode(json_encode(array_replace_recursive(json_decode(json_encode($default->fab_design), true), $params['fab_design'])));
+            $options->fab_design = json_decode( json_encode( array_replace_recursive( json_decode( json_encode( $default->fab_design ), true ), $params['fab_design'] ) ) );
         }
 
-        /** Sanitize & Transform Order */
+        // Sanitize & Transform Order.
         if ( isset( $params['fab_order'] ) ) {
             $feature = $features['features']['core_order'];
             $feature->sanitize();
             $options->fab_order = $feature->transform();
         }
 
-        /** Sanitize & Transform Feature */
+        // Sanitize & Transform Feature.
         if ( isset( $params['fab_hooks'] ) ) {
             $feature = $features['features']['core_hooks'];
             $feature->sanitize();
             $options->fab_hooks = $feature->transform();
         }
 
-        /** Save config */
+        // Save config.
         $this->WP->update_option( 'fab_config', $options );
 
         /**
          * Modular Configuration Features Update
          */
 
-        /** Sanitize & Transform Feature */
+        // Sanitize & Transform Feature.
         if ( isset( $params['fab_core_miscellaneous'] ) ) {
             $feature = $features['features']['core_miscellaneous'];
             $feature->sanitize();
@@ -233,28 +253,32 @@ class BackendPage extends Base implements Model_Interface {
             );
         }
 
-        return wp_send_json_success( array(
-            'status'  => 'success',
-            'message' => __( 'Settings updated successfully.', 'floating-awesome-button' ),
-        ) );
+        return wp_send_json_success(
+            array(
+                'status'  => 'success',
+                'message' => __( 'Settings updated successfully.', 'floating-awesome-button' ),
+            )
+        );
     }
 
     /**
      * Get Lists of registered features, controller, & APIs
+     *
+     * @return array
      */
     public function page_setting_features() {
-        /** Transform features */
+        // Transform features.
         $features     = $this->Plugin->getFeatures();
         $featureHooks = array();
 
-        /** Map Controller */
+        // Map Controller.
         foreach ( $this->Plugin->getControllers() as $name => $controller ) {
             foreach ( $controller->getHooks() as $hook ) {
                 $feature                    = ( $hook->getFeature() ) ? $hook->getFeature()->getKey() : 'others';
                 $featureHooks[ $feature ][] = $hook;
             }
         }
-        /** Map APIs */
+        // Map APIs.
         $APIs = $this->Plugin->getApis();
         if ( $APIs ) {
             foreach ( $APIs as $name => $controller ) {
@@ -283,7 +307,7 @@ class BackendPage extends Base implements Model_Interface {
      * @return void
      */
     public function run() {
-        /** @backend - Add custom admin page under settings */
+        // @backend - Add custom admin page under settings.
         add_action( 'admin_menu', array( $this, 'admin_menu_setting' ) );
     }
 }

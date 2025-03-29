@@ -2,15 +2,7 @@
 
 namespace Fab\Helper;
 
-! defined( 'WPINC ' ) or die;
-
-/**
- * Plugin hooks in a backend
- * setComponent
- *
- * @package    Fab
- * @subpackage Fab/Controller
- */
+! defined( 'WPINC ' ) || die;
 
 use Fab\Metabox\FABMetaboxLocation;
 use Fab\Metabox\FABMetaboxSetting;
@@ -24,16 +16,24 @@ use Fab\Module\FABModuleAnchorLink;
 use Fab\Module\FABModuleSearch;
 use Fab\View;
 
+/**
+ * FAB Item.
+ *
+ * @package    Fab
+ * @subpackage Fab/Helper
+ */
 class FABItem {
 
     /**
      * Helper object
+     *
      * @var object
      */
     protected $Helper;
 
     /**
      * WP object
+     *
      * @var object
      */
     protected $WP;
@@ -194,147 +194,137 @@ class FABItem {
      */
     public $obj = array();
 
-    /** format fab item to send to view
+    /**
+     * Format fab item to send to view.
      *
-     * @return array [ 'icon_class'=>'','type'=>'','id'=>'',]
+     * @param int $ID FAB Item ID.
+     * @return void
      */
     public function __construct( int $ID ) {
-        /** Get Plugin Instance */
-        $plugin   = \Fab\Plugin::getInstance();
-        $this->WP = $plugin->getWP();
+        // Get Plugin Instance.
+        $plugin       = \Fab\Plugin::getInstance();
+        $this->WP     = $plugin->getWP();
         $this->Helper = $plugin->getHelper();
-        $options  = $plugin->getConfig()->options;
+        $options      = $plugin->getConfig()->options;
 
-        /** Construct Class */
+        // Construct Class.
         $this->ID              = $ID;
         $this->to_be_displayed = true;
         $this->title           = get_post_field( 'post_title', $this->ID );
         $this->raw_content     = wp_kses_post( get_post_field( 'post_content', $this->ID ) );
-        $this->no_html_content = str_replace( array("\n", "\r"), '', strip_tags( wp_kses_post( get_post_field( 'post_content', $this->ID ) ) ) );
+        $this->no_html_content = str_replace( array( "\n", "\r" ), '', strip_tags( wp_kses_post( get_post_field( 'post_content', $this->ID ) ) ) );
         $this->slug            = get_post_field( 'post_name', $this->ID );
         $this->status          = get_post_field( 'post_status', $this->ID );
-        $this->modal           = new FABModal($this->ID);
+        $this->modal           = new FABModal( $this->ID );
         $this->icon_class      = $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['icon_class']['meta_key'], true );
         $this->icon_class      = $this->getIconClass();
         $this->type            = $this->WP->get_post_meta( $this->ID, FABMetaboxSetting::$post_metas['type']['meta_key'], true );
         $this->hotkey          = $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['hotkey']['meta_key'], true );
-        $this->hotkey          = ($this->hotkey==='none') ? '' : $this->hotkey;
+        $this->hotkey          = ( $this->hotkey === 'none' ) ? '' : $this->hotkey;
 
-        /** Construct Function */
-        $this->construct_grabModule();
+        // Construct Function.
+        $this->construct_grab_module();
         $this->construct_nestedAttributes();
-        $this->construct_grabLink();
-        $this->construct_extraOptions();
 
-        /** Extra Function */
+        // Extra Function.
         $this->match(); // Auto Match Location.
-        $this->detect_builder(); // Detect content builder
+        $this->detect_builder(); // Detect content builder.
     }
 
-    /** Grab Module */
-    public function construct_grabModule(){
-        if( 'anchor_link' === $this->type ){ $this->module = new FABModuleAnchorLink(); }
-        elseif ( 'auth_login' === $this->type ) { $this->module = new FABModuleAuthLogin(); }
-        elseif ( 'auth_logout' === $this->type ){ $this->module = new FABModuleAuthLogout(); }
-        elseif( 'readingbar' === $this->type ){ $this->module = new FABModuleReadingBar(); }
-        elseif( 'scrolltotop' === $this->type ){ $this->module = new FABModuleScrollToTop(); }
-        elseif ( 'search' === $this->type ){ $this->module = new FABModuleSearch(); }
+    /**
+     * Grab Module
+     *
+     * @return void
+     */
+    public function construct_grab_module() {
+        $modules = array(
+            FABModuleAnchorLink::class,
+            FABModuleAuthLogin::class,
+            FABModuleAuthLogout::class,
+            FABModuleReadingBar::class,
+            FABModuleScrollToTop::class,
+            FABModuleSearch::class,
+        );
+        foreach ( $modules as $moduleClass ) {
+            if ( $moduleClass::$type === $this->type ) {
+                $this->module = new $moduleClass();
+                break;
+            }
+        }
     }
 
-    /** Grab Nested Attributes */
-    public function construct_nestedAttributes(){
-        /** Size */
-        $this->size            = array(
+    /**
+     * Grab Nested Attributes
+     *
+     * @return void
+     */
+    public function construct_nestedAttributes() {
+        // Size.
+        $this->size = array(
             'type'   => ( $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['size_type']['meta_key'], true ) ) ?
                 $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['size_type']['meta_key'], true ) : 'medium',
             'custom' => ( $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['size_custom']['meta_key'], true ) ) ?
                 $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['size_custom']['meta_key'], true ) : '',
         );
 
-        /** Animation */
-        $default = FABMetaboxDesign::$input['fab_design_animation']['default'];
+        // Animation.
+        $default         = FABMetaboxDesign::$input['fab_design_animation']['default'];
         $this->animation = $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['animation']['meta_key'], true );
         $this->animation = ( $this->animation ) ? $this->Helper->ArrayMergeRecursive( (array) $default, (array) $this->animation ) : $default;
 
-        /** Responsive */
-        $default = FABMetaboxDesign::$input['fab_design_responsive']['default'];
+        // Responsive.
+        $default          = FABMetaboxDesign::$input['fab_design_responsive']['default'];
         $this->responsive = $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['responsive']['meta_key'], true );
         $this->responsive = ( $this->responsive ) ? $this->Helper->ArrayMergeRecursive( (array) $default, (array) $this->responsive ) : $default;
 
-        /** Standalone */
-        $standalone = ['readingbar', 'scrolltotop'];
-        $this->standalone = (in_array($this->type, $standalone)) ? true : false;
-        $this->standalone = ($this->standalone===false) ? $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['standalone']['meta_key'], true ) : $this->standalone;
+        // Standalone.
+        $standalone       = array( 'readingbar', 'scrolltotop' );
+        $this->standalone = ( in_array( $this->type, $standalone ) ) ? true : false;
+        $this->standalone = ( $this->standalone === false ) ? $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['standalone']['meta_key'], true ) : $this->standalone;
 
-        /** Trigger */
-        $default = FABMetaboxTrigger::$input['fab_trigger']['default'];
+        // Trigger.
+        $default       = FABMetaboxTrigger::$input['fab_trigger']['default'];
         $this->trigger = $this->WP->get_post_meta( $this->ID, FABMetaboxTrigger::$post_metas['trigger']['meta_key'], true );
         $this->trigger = ( $this->trigger ) ? $this->Helper->ArrayMergeRecursive( (array) $default, (array) $this->trigger ) : $default;
 
-        /** Template */
-        $default = FABMetaboxDesign::$input['fab_design_template']['default'];
+        // Template.
+        $default        = FABMetaboxDesign::$input['fab_design_template']['default'];
         $this->template = $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['template']['meta_key'], true );
         $this->template = ( $this->template ) ? $this->Helper->ArrayMergeRecursive( (array) $default, (array) $this->template ) : $default;
 
-        /** Tooltip */
-        $default = FABMetaboxDesign::$input['fab_design_tooltip']['default'];
+        // Tooltip.
+        $default       = FABMetaboxDesign::$input['fab_design_tooltip']['default'];
         $this->tooltip = $this->WP->get_post_meta( $this->ID, FABMetaboxDesign::$post_metas['tooltip']['meta_key'], true );
         $this->tooltip = ( $this->tooltip ) ? $this->Helper->ArrayMergeRecursive( (array) $default, (array) $this->tooltip ) : $default;
 
-        /** Location */
+        // Location.
         $this->locations = $this->WP->get_post_meta( $this->ID, FABMetaboxLocation::$post_metas['locations']['meta_key'], true );
         $this->locations = ( $this->locations ) ? json_decode( $this->locations, true ) : array();
         $this->locations = $this->Helper->transformLocationValue( $this->locations );
 
-        /** Toast */
-        $default = FABMetaboxSetting::get_input()['fab_setting_toast']['default'];
+        // Toast.
+        $default     = FABMetaboxSetting::get_input()['fab_setting_toast']['default'];
         $this->toast = $this->WP->get_post_meta( $this->ID, FABMetaboxSetting::$post_metas['toast']['meta_key'], true );
         $this->toast = ( $this->toast ) ? $this->Helper->ArrayMergeRecursive( (array) $default, (array) $this->toast ) : $default;
 
-        do_action('fab_item_data', $this);
+        do_action( 'fab_item_data', $this );
     }
 
-    /** Grab Link */
-    public function construct_grabLink(){
-        if ( $this->type === 'link' || $this->type === 'anchor_link' ) {
-            $this->link         = $this->WP->get_post_meta( $this->ID, FABMetaboxSetting::$post_metas['link']['meta_key'], true );
-            $this->link         = ( $this->link && is_string( $this->link ) ) ? $this->link : '';
-            $this->linkBehavior = $this->WP->get_post_meta( $this->ID, FABMetaboxSetting::$post_metas['link_behavior']['meta_key'], true );
-        } elseif ( $this->type === 'auth_logout' ) {
-            $this->link = wp_logout_url( home_url() );
-        } elseif ( $this->type === 'latest_post_link' ) {
-            $post = wp_get_recent_posts(array(
-                'numberposts' => '1',
-                'post_status' => 'publish'
-            ));
-            if(isset($post[0])) { $this->link = get_permalink($post[0]['ID']); }
-        }
-    }
-
-    /** Grab Extra Options */
-    public function construct_extraOptions(){
-        if($this->type==='print'){
-            $this->extraOptions['print'] = array(
-                'target' => $this->WP->get_post_meta( $this->ID, FABMetaboxSetting::$post_metas['print_target']['meta_key'], true ),
-            );
-        }
-    }
-
-    /** Match current displayed post by locations setting on cpt fab items
+    /**
+     * Match current displayed post by locations setting on cpt fab items
      *
-     * @param array $fab_locations post_meta 'fab_locations'
      * @return void
      */
     public function match() {
-        /** Grab Data */
+        // Grab Data.
         global $post;
 
-        /** Validate */
+        // Validate.
         if ( ! $this->locations ) {
             return;
         }
 
-        /** Loop location config */
+        // Loop location config.
         $validations = array();
 
         // Iterate over each location configuration.
@@ -345,54 +335,52 @@ class FABItem {
                 'rules' => isset( $location['rules'] ) ? $location['rules'] : array(),
             );
 
-            /** Rule Check */
+            // Rule Check.
             $condition['passed'] = false;
 
-            $post_id = isset($post->ID) ? $post->ID : 0;
+            $post_id = isset( $post->ID ) ? $post->ID : 0;
 
-            if( is_plugin_active('woocommerce/woocommerce.php') ){
-                if (is_shop()) {
-                    $post_id = wc_get_page_id('shop');
-                } elseif (is_cart()) {
-                    $post_id = wc_get_page_id('cart');
-                } elseif (is_checkout()) {
-                    $post_id = wc_get_page_id('checkout');
+            if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+                if ( is_shop() ) {
+                    $post_id = wc_get_page_id( 'shop' );
+                } elseif ( is_cart() ) {
+                    $post_id = wc_get_page_id( 'cart' );
+                } elseif ( is_checkout() ) {
+                    $post_id = wc_get_page_id( 'checkout' );
                 }
             }
 
             // Loop through each rule and apply the matching logic.
-            foreach ($condition['rules'] as $index => $rule) {
-                $current_passed = apply_filters( 'fab_match_rule', false, $rule);
+            foreach ( $condition['rules'] as $index => $rule ) {
+                $current_passed = apply_filters( 'fab_match_rule', false, $rule );
 
                 // Combine the current result with previous results based on logic.
-                if ($index === 0) { // For the first rule, initialize 'passed' with the current result.
+                if ( $index === 0 ) { // For the first rule, initialize 'passed' with the current result.
                     $condition['passed'] = $current_passed;
-                } else { // For subsequent rules, combine using the specified logic.
-                    if ($rule['logic'] === 'AND') {
+                } elseif ( $rule['logic'] === 'AND' ) { // For subsequent rules, combine using the specified logic.
                         $condition['passed'] = $condition['passed'] && $current_passed;
-                    } elseif ($rule['logic'] === 'OR') {
+                    } elseif ( $rule['logic'] === 'OR' ) {
                         $condition['passed'] = $condition['passed'] || $current_passed;
-                    }
                 }
 
                 // If the logic is AND and a rule fails, we can exit early.
-                if (!$condition['passed'] && $condition['logic'] === 'AND') {
+                if ( ! $condition['passed'] && $condition['logic'] === 'AND' ) {
                     break;
                 }
             }
 
-            /** Store Validations */
+            // Store Validations.
             $validations[] = $condition;
         }
 
-        /** Validate Logic (OR, AND) */
+        // Validate Logic (OR, AND).
         $to_be_displayed = $validations[0]['passed'];
-        if (count($validations) > 1) {
-            for ($i = 1; $i < count($validations); $i++) {
-                if ($validations[$i - 1]['logic'] === 'OR') {
-                    $to_be_displayed = $to_be_displayed || $validations[$i]['passed'];
-                } elseif ($validations[$i - 1]['logic'] === 'AND') {
-                    $to_be_displayed = $to_be_displayed && $validations[$i]['passed'];
+        if ( count( $validations ) > 1 ) {
+            for ( $i = 1; $i < count( $validations ); $i++ ) {
+                if ( $validations[ $i - 1 ]['logic'] === 'OR' ) {
+                    $to_be_displayed = $to_be_displayed || $validations[ $i ]['passed'];
+                } elseif ( $validations[ $i - 1 ]['logic'] === 'AND' ) {
+                    $to_be_displayed = $to_be_displayed && $validations[ $i ]['passed'];
                 }
             }
         }
@@ -402,9 +390,11 @@ class FABItem {
 
     /**
      * Detect content builder
+     *
+     * @return void
      */
     public function detect_builder() {
-        if ( is_plugin_active( 'elementor/elementor.php' ) && \Elementor\Plugin::instance()->documents->get( $this->getID() )->is_built_with_elementor()) {
+        if ( is_plugin_active( 'elementor/elementor.php' ) && \Elementor\Plugin::instance()->documents->get( $this->getID() )->is_built_with_elementor() ) {
             // Elementor builder
             $this->builder = 'elementor';
         } else { // Default builder
@@ -425,7 +415,7 @@ class FABItem {
             $this->render_widget();
         } elseif ( 'widget' === $this->type ) {
             $this->render_widget();
-        } elseif( $this->module && method_exists( $this->module, 'render' ) ){
+        } elseif ( $this->module && method_exists( $this->module, 'render' ) ) {
             $this->module->render();
         }
     }
@@ -433,25 +423,30 @@ class FABItem {
     /**
      * Render FAB Content
      *
+     * @param string $content
      * @return void
      */
     public function render_content( $content = '' ) {
         global $wp_embed;
 
-        /** Render Elementor */
+        // Render Elementor.
         if ( $this->builder !== 'elementor' ) {
             $content = get_post_field( 'post_content', $this->getID() ); // Get post content.
             $content = $wp_embed->autoembed( do_blocks( $content ) );
             $content = wp_kses_post( $content ); // Esc content.
         }
 
-        /** Output the content */
+        // Output the content.
         View::RenderStatic(
-            sprintf('Template/modal/layout/%s',
-                isset($this->getModal()->getLayout()['id']) ?
+            sprintf(
+                'Template/modal/layout/%s',
+                isset( $this->getModal()->getLayout()['id'] ) ?
                     $this->getModal()->getLayout()['id'] : 'stacked'
             ),
-            array( 'fab_item' => $this, 'content' => $content )
+            array(
+                'fab_item' => $this,
+                'content'  => $content,
+            )
         );
     }
 
@@ -598,16 +593,14 @@ class FABItem {
     /**
      * @return bool
      */
-    public function isStandalone(): bool
-    {
+    public function isStandalone(): bool {
         return $this->standalone;
     }
 
     /**
      * @param bool $standalone
      */
-    public function setStandalone(bool $standalone): void
-    {
+    public function setStandalone( bool $standalone ): void {
         $this->standalone = $standalone;
     }
 
@@ -670,48 +663,42 @@ class FABItem {
     /**
      * @return array
      */
-    public function getAnimation()
-    {
+    public function getAnimation() {
         return $this->animation;
     }
 
     /**
      * @param array $animation
      */
-    public function setAnimation($animation): void
-    {
+    public function setAnimation( $animation ): void {
         $this->animation = $animation;
     }
 
     /**
      * @return FABModal
      */
-    public function getModal(): FABModal
-    {
+    public function getModal(): FABModal {
         return $this->modal;
     }
 
     /**
      * @param FABModal $modal
      */
-    public function setModal(FABModal $modal): void
-    {
+    public function setModal( FABModal $modal ): void {
         $this->modal = $modal;
     }
 
     /**
      * @return FABModule
      */
-    public function getModule()
-    {
+    public function getModule() {
         return $this->module;
     }
 
     /**
      * @param FABModule $module
      */
-    public function setModule($module): void
-    {
+    public function setModule( $module ): void {
         $this->module = $module;
     }
 
@@ -732,32 +719,28 @@ class FABItem {
     /**
      * @return array
      */
-    public function getTemplate(): array
-    {
+    public function getTemplate(): array {
         return $this->template;
     }
 
     /**
      * @param array $template
      */
-    public function setTemplate(array $template): void
-    {
+    public function setTemplate( array $template ): void {
         $this->template = $template;
     }
 
     /**
      * @return array
      */
-    public function getTooltip()
-    {
+    public function getTooltip() {
         return $this->tooltip;
     }
 
     /**
      * @param array $tooltip
      */
-    public function setTooltip($tooltip): void
-    {
+    public function setTooltip( $tooltip ): void {
         $this->tooltip = $tooltip;
     }
 
@@ -806,24 +789,23 @@ class FABItem {
     /**
      * @return array
      */
-    public function getExtraOptions(): array
-    {
+    public function getExtraOptions(): array {
         return $this->extraOptions;
     }
 
     /**
      * @param array $extraOptions
      */
-    public function setExtraOptions(array $extraOptions): void
-    {
+    public function setExtraOptions( array $extraOptions ): void {
         $this->extraOptions = $extraOptions;
     }
 
     /** Grab All Assigned Variables */
     public function getVars() {
-        $data = get_object_vars( $this );
+        $data          = get_object_vars( $this );
         $data['modal'] = $this->modal->getVars();
-        if($this->module) { $data['module'] = $this->module->getVars(); }
+        if ( $this->module ) {
+            $data['module'] = $this->module->getVars(); }
         return $data;
     }
 
@@ -832,8 +814,7 @@ class FABItem {
      *
      * @return array
      */
-    public function getToast(): array
-    {
+    public function getToast(): array {
         return $this->toast;
     }
 
@@ -843,9 +824,7 @@ class FABItem {
      * @param array $toast
      * @return void
      */
-    public function setToast(array $toast): void
-    {
-        $this->toast = array_merge($this->toast, $toast);
+    public function setToast( array $toast ): void {
+        $this->toast = array_merge( $this->toast, $toast );
     }
-
 }

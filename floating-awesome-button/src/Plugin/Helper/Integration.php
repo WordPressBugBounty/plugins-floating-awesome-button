@@ -39,4 +39,19 @@ trait Integration {
         return 'enabled';
     }
 
+    /**
+     * Autoload integration
+     *
+     * @param string $plugin_file The plugin file.
+     * @return void
+     */
+    public function autoload_integration( $plugin_file ) {
+        // Check if there's integration option
+        $option_name = sprintf('fab_integration_%s', $plugin_file);
+        $integration_option = get_option($option_name);
+        if( ! $integration_option ){
+            update_option($option_name, 'yes');
+        }
+    }
+
 }

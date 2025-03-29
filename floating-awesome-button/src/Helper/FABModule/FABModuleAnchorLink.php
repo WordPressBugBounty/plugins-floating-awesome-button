@@ -2,19 +2,28 @@
 
 namespace Fab\Module;
 
-! defined( 'WPINC ' ) or die;
+! defined( 'WPINC ' ) || die;
 
 /**
- * Plugin hooks in a backend
- * setComponent
+ * FAB Module Anchor Link.
  *
  * @package    Fab
- * @subpackage Fab/Controller
+ * @subpackage Fab/Module
  */
-
 class FABModuleAnchorLink extends FABModule {
 
-    /** Constructor Method */
+    /**
+     * Type.
+     *
+     * @var string
+     */
+    public static $type = 'anchor_link';
+
+    /**
+     * Constructor.
+     *
+     * @return void
+     */
     public function __construct() {
         parent::__construct();
         $this->key         = 'module_linkanchor';
@@ -24,14 +33,13 @@ class FABModuleAnchorLink extends FABModule {
         /** Initialize Options */
         $this->options = array(
             'duration' => array(
-                'text' => 'Duration',
-                'type' => 'number',
+                'text'  => 'Duration',
+                'type'  => 'number',
                 'value' => 400,
-                'info' => 'Window scroll duration in miliseconds'
+                'info'  => 'Window scroll duration in miliseconds',
             ),
         );
-        $options = $this->WP->get_option( sprintf('fab_%s', $this->key) );
-        $this->options = (is_array($options)) ? $this->Helper->ArrayMergeRecursive($this->options, $options) : $this->options;
+        $options       = $this->WP->get_option( sprintf( 'fab_%s', $this->key ) );
+        $this->options = ( is_array( $options ) ) ? $this->Helper->ArrayMergeRecursive( $this->options, $options ) : $this->options;
     }
-
 }

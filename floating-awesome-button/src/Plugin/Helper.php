@@ -2,7 +2,7 @@
 
 namespace Fab\Plugin;
 
-!defined( 'WPINC ' ) or die;
+! defined( 'WPINC ' ) || die;
 
 /**
  * Helper library for Fab plugins
@@ -10,7 +10,6 @@ namespace Fab\Plugin;
  * @package    Fab
  * @subpackage Fab\Includes
  */
-
 class Helper {
 
     /** Load Trait */
@@ -18,6 +17,7 @@ class Helper {
     use Helper\Integration;
     use Helper\Option;
     use Helper\Operator;
+    use Helper\Page;
     use Helper\Plan;
     use Helper\Singleton;
     use Helper\Template;
@@ -25,29 +25,31 @@ class Helper {
 
     /**
      * Convert html relative path into absolute path
-     * @var     string  $path   Wordpress base path
-     * @var     string  $html   Html string
-     * @return  void
+     *
+     * @param     string $path   WordPress base path.
+     * @param     string $html   Html string.
+     * @return  string
      */
-    public function convertImagesRelativetoAbsolutePath($path, $html){
-        $pattern = "/<img([^>]*) " .
-            "src=\"([^http|ftp|https][^\"]*)\"/";
-        $replace = "<img\${1} src=\"" . $path . "\${2}\"";
-        return preg_replace($pattern, $replace, $html);
+    public function convertImagesRelativetoAbsolutePath( $path, $html ) {
+        $pattern = '/<img([^>]*) ' .
+            'src="([^http|ftp|https][^"]*)"/';
+        $replace = '<img${1} src="' . $path . '${2}"';
+        return preg_replace( $pattern, $replace, $html );
     }
 
     /**
      * Extract templates from config files
-     * @var     array   $config         Lists of config templates
-     * @var     array   $templates      Lists of templates, to return
+     *
+     * @param     array $config Lists of config templates.
+     * @param     array $templates Lists of templates, to return.
+     * @return  array
      */
-    public function getTemplatesFromConfig($config, $templates = []){
-        foreach($config as $template){
-            foreach($template->children as $children){
-                $templates[$children->id] = $children;
+    public function getTemplatesFromConfig( $config, $templates = array() ) {
+        foreach ( $config as $template ) {
+            foreach ( $template->children as $children ) {
+                $templates[ $children->id ] = $children;
             }
         }
         return $templates;
     }
-
 }

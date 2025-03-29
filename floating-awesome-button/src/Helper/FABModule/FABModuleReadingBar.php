@@ -2,19 +2,28 @@
 
 namespace Fab\Module;
 
-! defined( 'WPINC ' ) or die;
+! defined( 'WPINC ' ) || die;
 
 /**
- * Plugin hooks in a backend
- * setComponent
+ * FAB Module Reading Bar.
  *
  * @package    Fab
- * @subpackage Fab/Controller
+ * @subpackage Fab/Module
  */
-
 class FABModuleReadingBar extends FABModule {
 
-    /** Constructor Method */
+    /**
+     * Type.
+     *
+     * @var string
+     */
+    public static $type = 'readingbar';
+
+    /**
+     * Constructor.
+     *
+     * @return void
+     */
     public function __construct() {
         parent::__construct();
         $this->key         = 'module_readingbar';
@@ -23,44 +32,43 @@ class FABModuleReadingBar extends FABModule {
 
         /** Initialize Options */
         $this->options = array(
-            'target' => array(
-                'text' => 'Target Element',
-                'type' => 'text',
+            'target'   => array(
+                'text'  => 'Target Element',
+                'type'  => 'text',
                 'value' => 'body',
-                'info' => 'Target element class/id to stick the bar'
+                'info'  => 'Target element class/id to stick the bar',
             ),
             'template' => array(
-                'text' => 'Template',
+                'text'     => 'Template',
                 'children' => array(
                     'background_color' => array(
-                        'text' => 'Background Color',
-                        'type' => 'text',
+                        'text'  => 'Background Color',
+                        'type'  => 'text',
                         'class' => array( 'input' => 'colorpicker' ),
                         'value' => '#e5e7eb',
                     ),
                     'foreground_color' => array(
-                        'text' => 'Foreground Color',
-                        'type' => 'text',
+                        'text'  => 'Foreground Color',
+                        'type'  => 'text',
                         'class' => array( 'input' => 'colorpicker' ),
                         'value' => '#4f46e5',
                     ),
-                    'height' => array(
-                        'text' => 'Height',
-                        'type' => 'text',
+                    'height'           => array(
+                        'text'  => 'Height',
+                        'type'  => 'text',
                         'value' => '.25rem',
-                        'info' => 'Use any sizing values px, rem, em, vh, vw, etc. Default is set to .25rem'
+                        'info'  => 'Use any sizing values px, rem, em, vh, vw, etc. Default is set to .25rem',
                     ),
-                    'transition' => array(
-                        'text' => 'Transition',
-                        'type' => 'text',
+                    'transition'       => array(
+                        'text'  => 'Transition',
+                        'type'  => 'text',
                         'value' => '.25s',
-                        'info' => 'Default is set to .25s'
+                        'info'  => 'Default is set to .25s',
                     ),
-                )
-            )
+                ),
+            ),
         );
-        $options = $this->WP->get_option( sprintf('fab_%s', $this->key) );
-        $this->options = (is_array($options)) ? $this->Helper->ArrayMergeRecursive($this->options, $options) : $this->options;
+        $options       = $this->WP->get_option( sprintf( 'fab_%s', $this->key ) );
+        $this->options = ( is_array( $options ) ) ? $this->Helper->ArrayMergeRecursive( $this->options, $options ) : $this->options;
     }
-
 }

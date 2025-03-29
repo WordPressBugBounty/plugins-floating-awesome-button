@@ -10,7 +10,4 @@ namespace Fab\Controller;
  * @package    Fab
  * @subpackage Fab/Controller
  */
-
-class Base extends Controller {
-
-}
+class Base extends Controller {}

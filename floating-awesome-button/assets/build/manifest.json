@@ -1,24 +1,33 @@
 {
-  "_runtime-dom.esm-bundler-C5WK88vT.js": {
-    "file": "assets/runtime-dom.esm-bundler-C5WK88vT.js",
+  "_runtime-dom.esm-bundler-CqE9ZS4o.js": {
+    "file": "assets/runtime-dom.esm-bundler-CqE9ZS4o.js",
     "name": "runtime-dom.esm-bundler"
   },
   "assets/components/metabox-setting/main.js": {
-    "file": "components/metabox-setting/bundle.CDi4OjSd.js",
+    "file": "components/metabox-setting/bundle.DFEsYrVU.js",
     "name": "components/metabox-setting/bundle.js",
     "src": "assets/components/metabox-setting/main.js",
     "isEntry": true,
     "imports": [
-      "_runtime-dom.esm-bundler-C5WK88vT.js"
+      "_runtime-dom.esm-bundler-CqE9ZS4o.js"
     ]
   },
   "assets/components/templates/main.js": {
-    "file": "components/templates/bundle.Cwjg8c-0.js",
+    "file": "components/templates/bundle.NaEzFEzs.js",
     "name": "components/templates/bundle.js",
     "src": "assets/components/templates/main.js",
     "isEntry": true,
     "imports": [
-      "_runtime-dom.esm-bundler-C5WK88vT.js"
+      "_runtime-dom.esm-bundler-CqE9ZS4o.js"
+    ]
+  },
+  "assets/components/wc-metabox-product/main.js": {
+    "file": "components/wc-metabox-product/bundle.BJxva14S.js",
+    "name": "components/wc-metabox-product/bundle.js",
+    "src": "assets/components/wc-metabox-product/main.js",
+    "isEntry": true,
+    "imports": [
+      "_runtime-dom.esm-bundler-CqE9ZS4o.js"
     ]
   },
   "assets/ts/backend/plugin.ts": {

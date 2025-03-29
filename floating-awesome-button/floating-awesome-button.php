@@ -4,7 +4,7 @@
  * Plugin Name:       Floating Awesome Button
  * Plugin URI:        https://artistudio.xyz
  * Description:       Floating Awesome Button (FAB): Elevate engagement with customizable action buttons. Showcase modals,shortcodes, widgets & links effortlessly.
- * Version:           2.2.0
+ * Version:           2.3.0
  * Author:            Artistudio
  * Author URI:        https://brain.artistudio.xyz/artistudio/WordPress-floating-awesome-button
  * License:           GPL-3.0

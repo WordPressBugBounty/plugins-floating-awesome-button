@@ -17,11 +17,11 @@ trait Template {
      * Get template from /templates/$name.json
      *
      * @param string $name
-     * @return array
+     * @return object
      */
     public function get_template($name) {
         $template = file_get_contents(FAB_PLUGIN_PATH . 'templates/' . $name . '.json');
-        return json_decode($template, true);
+        return json_decode($template);
     }
 
 }

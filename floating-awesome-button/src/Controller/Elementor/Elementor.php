@@ -34,21 +34,21 @@ class Elementor extends Base implements Model_Interface {
         /** Register Sidebar */
         register_sidebar(
             array(
-                'name'          => __( 'FAB Elementor Modal' ),
-                'id'            => 'fab-widget-elementor',
+                'name' => __( 'FAB Elementor Modal' ),
+                'id'   => 'fab-widget-elementor',
             )
         );
     }
 
     /** Display the elementor modal */
-    public function fab_display_widget(){
+    public function fab_display_widget() {
         dynamic_sidebar( 'fab-widget-elementor' );
     }
 
     /**
      * [fab_elementor] Initiate elementor in page
      */
-    public function fab_elementor(){
+    public function fab_elementor() {
         global $post;
 
         /** Ignore in Pages */
@@ -57,15 +57,18 @@ class Elementor extends Base implements Model_Interface {
         }
 
         /** Grab Data */
-        $Fab            = $this->Plugin->getModels()['Fab'];
-        $fab_to_display = $Fab->get_lists_of_fab( array(
-            'validateLocation' => true,
-            'builder' => array('elementor')
-        ) )['items'];
+        $Fab            = \Fab\Model\Fab::getInstance();
+        $fab_to_display = $Fab->get_lists_of_fab(
+            array(
+                'validateLocation' => true,
+                'builder'          => array( 'elementor' ),
+            )
+        )['items'];
 
         /** Show FAB Button */
         if ( ! is_admin() && $fab_to_display ) {
-            View::RenderStatic('Frontend.modal',
+            View::RenderStatic(
+                'Frontend.modal',
                 compact( 'post', 'fab_to_display' )
             );
         }

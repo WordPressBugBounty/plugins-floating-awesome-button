@@ -13,14 +13,16 @@ use Fab\Interfaces\Model_Interface;
  * @package    Fab
  * @subpackage Fab/Controller
  */
-class Contact_Form_7 extends Integration implements Model_Interface {
+class Contact_Form_7 extends Base implements Model_Interface {
 
     /**
-     * Plugin file
+     * Autoload integration
      *
-     * @var string
+     * @return void
      */
-    protected $plugin_file = 'contact-form-7/wp-contact-form-7.php';
+    public function autoload_integration() {
+        $this->Helper->autoload_integration( FAB_CONTACT_FORM_7_PLUGIN_FILE );
+    }
 
     /**
      * Add integration to FAB
@@ -35,8 +37,8 @@ class Contact_Form_7 extends Integration implements Model_Interface {
             'url' => 'https://wordpress.org/plugins/contact-form-7/',
             'icon_url' => 'https://ps.w.org/contact-form-7/assets/icon.svg',
             'banner_url' => 'https://ps.w.org/contact-form-7/assets/banner-1544x500.png',
-            'plugin_file' => $this->plugin_file,
-            'status' => \Fab\Plugin\Helper::getInstance()->check_plugin_integration($this->plugin_file),
+            'plugin_file' => FAB_CONTACT_FORM_7_PLUGIN_FILE,
+            'status' => \Fab\Plugin\Helper::getInstance()->check_plugin_integration(FAB_CONTACT_FORM_7_PLUGIN_FILE),
         );
         return $integrations;
     }
@@ -50,7 +52,7 @@ class Contact_Form_7 extends Integration implements Model_Interface {
      */
     public function filter_template_content($content, $type, $data){
         // Prevent error if contact form 7 plugin is not active.
-        if( !is_plugin_active($this->plugin_file) || !isset($data->requires) || !in_array($this->plugin_file, $data->requires) ){
+        if( !is_plugin_active( FAB_CONTACT_FORM_7_PLUGIN_FILE ) || !isset($data->requires) || !in_array( FAB_CONTACT_FORM_7_PLUGIN_FILE, $data->requires) ){
             return $content;
         }
 
@@ -89,7 +91,7 @@ class Contact_Form_7 extends Integration implements Model_Interface {
         $screen = get_current_screen();
 
         // Check if screen is CF7 edit page and integration is enabled
-        if ( $screen->id === 'toplevel_page_wpcf7' && \Fab\Plugin\Helper::getInstance()->check_plugin_integration($this->plugin_file) === 'enabled' ) {
+        if ( $screen->id === 'toplevel_page_wpcf7' && \Fab\Plugin\Helper::getInstance()->check_plugin_integration(FAB_CONTACT_FORM_7_PLUGIN_FILE) === 'enabled' ) {
             $this->WP->wp_enqueue_script_typescript( 'fab-integration-contact-form-7', 'assets/ts/integration/contact-form-7.ts', array(), FAB_VERSION, true );
             $this->WP->wp_localize_script( 'fab-integration-contact-form-7', 'FAB_TEMPLATE', array(
                 'id' => 'contact-form-7-popup',
@@ -116,7 +118,7 @@ class Contact_Form_7 extends Integration implements Model_Interface {
         add_filter( 'fab_plugin_integrations', array( $this, 'add_integration' ) );
 
         // Prevent error if plugin is not active.
-        if( !is_plugin_active($this->plugin_file) ){
+        if( !is_plugin_active( FAB_CONTACT_FORM_7_PLUGIN_FILE ) ){
             return;
         }
 

@@ -60,6 +60,16 @@ class Constants {
         define( 'FAB_PLUGIN_PATH', $path['plugin_path'] );
         define( 'FAB_SLUG', \Fab\Plugin::getInstance()->getSlug() );
         define( 'FAB_POST_TYPE_NAME', \Fab\Model\Fab::getInstance()->getName() );
+
+        /**
+         * Third Party Integrations
+         *
+         * NOTE:
+         * - We define these constants here because we need to check if the plugin is active before using it.
+         * - We can't use $controller::getInstance()->get_plugin_file() because it'll cause racing encapsulation.
+         */
+        define( 'FAB_CONTACT_FORM_7_PLUGIN_FILE', 'contact-form-7/wp-contact-form-7.php' );
+        define( 'FAB_WOOCOMMERCE_PLUGIN_FILE', 'woocommerce/woocommerce.php' );
     }
 
     /**

@@ -2,20 +2,25 @@
 
 namespace Fab\Module;
 
-! defined( 'WPINC ' ) or die;
-
-/**
- * Plugin hooks in a backend
- * setComponent
- *
- * @package    Fab
- * @subpackage Fab/Controller
- */
+! defined( 'WPINC ' ) || die;
 
 use FAB\Plugin;
 use Fab\View;
 
+/**
+ * FAB Module Search.
+ *
+ * @package    Fab
+ * @subpackage Fab/Module
+ */
 class FABModuleSearch extends FABModule {
+
+    /**
+     * Type.
+     *
+     * @var string
+     */
+    public static $type = 'search';
 
     /**
      * Module construect
@@ -30,36 +35,39 @@ class FABModuleSearch extends FABModule {
 
         /** Initialize Options */
         $this->options = array(
-            'label' => array(
-                'text' => 'Search Label',
-                'type' => 'text',
+            'label'      => array(
+                'text'  => 'Search Label',
+                'type'  => 'text',
                 'value' => 'Search...',
             ),
             'pagination' => array(
-                'text' => 'Pagination',
+                'text'     => 'Pagination',
                 'children' => array(
-                    'enable' => array(
-                        'text' => 'Enable Pagination',
+                    'enable'   => array(
+                        'text'  => 'Enable Pagination',
                         'label' => array( 'text' => 'Enable/Disable' ),
-                        'type' => 'switch',
+                        'type'  => 'switch',
                         'value' => 1,
                     ),
                     'per_page' => array(
-                        'text' => 'Per Page',
-                        'type' => 'text',
+                        'text'  => 'Per Page',
+                        'type'  => 'text',
                         'value' => '10',
-                        'info' => 'Maximum number of items to be returned in result set.'
+                        'info'  => 'Maximum number of items to be returned in result set.',
                     ),
-                )
-            )
+                ),
+            ),
         );
-        $options = $this->WP->get_option( sprintf('fab_%s', $this->key) );
-        $this->options = (is_array($options)) ? $this->Helper->ArrayMergeRecursive($this->options, $options) : $this->options;
+        $options       = $this->WP->get_option( sprintf( 'fab_%s', $this->key ) );
+        $this->options = ( is_array( $options ) ) ? $this->Helper->ArrayMergeRecursive( $this->options, $options ) : $this->options;
     }
 
-    /** Render Module */
-    public function render(){
-        View::RenderStatic('Frontend.Module.search');
+    /**
+     * Render Module.
+     *
+     * @return void
+     */
+    public function render() {
+        View::RenderStatic( 'Frontend.Module.search' );
     }
-
 }

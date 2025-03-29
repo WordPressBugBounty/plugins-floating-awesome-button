@@ -16,6 +16,39 @@ class FAB_Template {
     // Load Traits
     use \Fab\Plugin\Helper\Singleton;
 
+    /**
+     * Add new fab
+     *
+     * @param object $data The data.
+     * @return void
+     */
+    public function add_new_fab($data) {
+        // Read template file
+        $template = \Fab\Plugin\Helper::getInstance()->get_template($data->id);
+        $data = \Fab\Plugin\Helper::getInstance()->ArrayMergeRecursive( $template, $data );
+
+        // Transform template data
+        try {
+            // Insert post
+            $post_id = wp_insert_post(array(
+                'post_type' => 'fab',
+                'post_title' => $data->name,
+                'post_content' => $this->get_content($data),
+                'post_status' => 'publish',
+            ));
+
+            // Add postmeta
+            $postmeta = $this->transform_template_to_postmeta($data);
+            foreach ($postmeta as $key => $value) {
+                update_post_meta($post_id, $key, $value);
+            }
+
+            return $post_id;
+        } catch (Exception $e) {
+            return new \WP_Error('fab_template_error', $e->getMessage());
+        }
+    }
+
     /***
      * Get Content
      * - This function is used to get the content of the template based on the type
@@ -34,7 +67,7 @@ class FAB_Template {
                 $content = $data->settings->content;
                 break;
             default:
-                $content = '';
+                $content = isset($data->settings->content) ? $data->settings->content : '';
         }
 
         return apply_filters('fab_template_content', $content, $this->type, $data);

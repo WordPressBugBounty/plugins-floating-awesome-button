@@ -135,7 +135,7 @@ class Cart_Reminder extends Base implements Model_Interface {
         add_filter('fab_setting_types', array($this, 'add_fab_setting_types'), 10, 1);
 
         // Prevent error if woocommerce plugin is not active.
-        if( !is_plugin_active('woocommerce/woocommerce.php') ){
+        if( !is_plugin_active( FAB_WOOCOMMERCE_PLUGIN_FILE ) ){
             return;
         }
 

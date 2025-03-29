@@ -118,42 +118,26 @@ class Templates extends Base implements Model_Interface {
             'permission_callback' => function() {
                 return defined('FAB_REST_API_USER_IS_ADMIN') && FAB_REST_API_USER_IS_ADMIN;
             },
-            'callback' => array( $this, 'add_new_fab' ),
+            'callback' => array( $this, 'add_new_fab_rest_callback' ),
         ) );
     }
 
     /**
-     * Add new fab
+     * Add new fab rest callback
      *
+     * @param array $data The data.
      * @return void
      */
-    public function add_new_fab() {
+    public function add_new_fab_rest_callback($data) {
         $data = json_decode(file_get_contents('php://input'));
 
-        // Read template file
-        $template = file_get_contents(FAB_PLUGIN_PATH . 'templates/' . $data->id . '.json');
-        $data = $this->Helper->ArrayMergeRecursive( json_decode($template), $data );
+        // Add new fab
+        $result = \Fab\Helper\FAB_Template::getInstance()->add_new_fab($data);
+        $response = !is_wp_error($result) ?
+            array( 'message' => __('Success', 'floating-awesome-button'), 'post_id' => $result ) :
+            array( 'message' => __('Error: ' . $result->get_error_message(), 'floating-awesome-button') );
 
-        // Transform template data
-        try {
-            // Insert post
-            $post_id = wp_insert_post(array(
-                'post_type' => 'fab',
-                'post_title' => $data->name,
-                'post_content' => FAB_Template::getInstance()->get_content($data),
-                'post_status' => 'publish',
-            ));
-
-            // Add postmeta
-            $postmeta = FAB_Template::getInstance()->transform_template_to_postmeta($data);
-            foreach ($postmeta as $key => $value) {
-                update_post_meta($post_id, $key, $value);
-            }
-
-            return rest_ensure_response( array( 'message' => 'Success', 'post_id' => $post_id ) );
-        } catch (Exception $e) {
-            return rest_ensure_response( array( 'message' => 'Error: ' . $e->getMessage() ) );
-        }
+        return rest_ensure_response( $response );
     }
 
     /**
